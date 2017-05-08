@@ -8,5 +8,13 @@
     <artifactId>industryOptimizer</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <dependencies>
+        <!-- https://mvnrepository.com/artifact/com.tilab.jade/jade -->
+        <dependency>
+            <groupId>com.tilab.jade</groupId>
+            <artifactId>jade</artifactId>
+            <version>4.4.0</version>
+        </dependency>
+    </dependencies>
 
 </project>
