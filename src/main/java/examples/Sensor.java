@@ -1,4 +1,4 @@
-package Examples;
+package examples;
 
 import jade.core.AID;
 import jade.core.Agent;
@@ -6,12 +6,11 @@ import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 
 public class Sensor extends Agent {
-	private SensorGui myGui;
+	private examples.SensorGui myGui;
 
 	@Override
     protected void setup() {
-        //System.out.println("Hello World! My name is Brutus");
-        myGui = new SensorGui(this);
+        myGui = new examples.SensorGui(this);
         myGui.display();
 
     }

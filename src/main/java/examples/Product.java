@@ -1,4 +1,4 @@
-package Examples;
+package examples;
 
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
