@@ -58,7 +58,7 @@ public class Product extends Agent {
                         System.out.println("Process stop");
                     }
 					else if(notice.split("_")[1].equals("FINALIZE")){
-                        System.out.println("Process finalize");
+                        System.out.println("Process finalize\n__________________");
                         sendMessage("PR_FINALIZE");
 //						for(AgentController ac : sensorsList){
 //							try {
