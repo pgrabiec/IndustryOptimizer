@@ -13,7 +13,7 @@ import java.util.ArrayList;
 
 public class Product extends Agent {
 	ArrayList<AgentController> sensorsList;
-	private int SENSOR_AGENTS_NUMBER = 3;
+	private int SENSOR_AGENTS_NUMBER = 2;
 
 	protected void setup() {
 		ContainerController cc = getContainerController();
@@ -44,19 +44,6 @@ public class Product extends Agent {
 			ACLMessage mesg = myAgent.receive();
 			if (mesg != null) {
 				String notice = mesg.getContent();
-				if(notice.equals("test")){
-					ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-					for(AgentController ac : sensorsList){
-						try {
-							msg.addReceiver(new AID(ac.getName().split("@")[0], AID.ISLOCALNAME));
-						} catch (StaleProxyException e) {
-							e.printStackTrace();
-						}
-					}
-					msg.setLanguage("Polish");
-					msg.setContent("test2");
-					send(msg);
-				}
 				if(notice.split("_")[0].equals("PR")){
 					if(notice.split("_")[1].equals("READY")){
 						sendMessage("PR_START");
