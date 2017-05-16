@@ -1,4 +1,4 @@
-package examples;
+package edu.agh.io.industryOptimizer.examples;
 
 import javax.swing.*;
 import java.awt.*;

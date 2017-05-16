@@ -1,4 +1,4 @@
-package model;
+package edu.agh.io.industryOptimizer.model;
 
 import org.junit.After;
 import org.junit.Before;

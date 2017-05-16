@@ -1,4 +1,4 @@
-package examples;
+package edu.agh.io.industryOptimizer.examples;
 
 import jade.core.AID;
 import jade.core.Agent;
@@ -7,13 +7,13 @@ import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 
 public class Sensor extends Agent {
-	private examples.SensorGui myGui;
+	private edu.agh.io.industryOptimizer.examples.SensorGui myGui;
 	private String processName;
 	private int phase = 0;
 
 	@Override
     protected void setup() {
-		myGui = new examples.SensorGui(this);
+		myGui = new edu.agh.io.industryOptimizer.examples.SensorGui(this);
 		this.processName = this.getArguments()[0].toString();
         myGui.display();
 
@@ -32,10 +32,10 @@ public class Sensor extends Agent {
 	public void sendNotice(){
 		sendMessage(getSensorNotice());
 		if(phase == 3) {
-			phase = 4;
-			myGui.update(phase);
+			phase = 0;
 		}
-	}
+        myGui.update(phase);
+    }
 
 	public void sendFarewell(){
 		sendMessage("EXIT_" + this.getName());
@@ -54,7 +54,10 @@ public class Sensor extends Agent {
 	}
 
 	private String getSensorNotice(){
-		if(phase == 1){
+        if(phase == 0){
+            return "PR_INIT";
+        }
+		else if(phase == 1){
 			return "PR_READY";
 		}
 		else if(phase == 2){
@@ -82,6 +85,9 @@ public class Sensor extends Agent {
 					else if(notice.split("_")[1].equals("STOP")){
 						phase = 3;
 					}
+                    else if(notice.split("_")[1].equals("FINALIZE")){
+                        phase = 0;
+                    }
 					myGui.update(phase);
 				}
 			}

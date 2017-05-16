@@ -1,4 +1,4 @@
-package examples;
+package edu.agh.io.industryOptimizer.examples;
 
 import jade.core.AID;
 import jade.core.Agent;
@@ -23,7 +23,7 @@ public class Product extends Agent {
 			args[0] = this.getName().split("@")[0];
 			for(int i = 1; i <= SENSOR_AGENTS_NUMBER; i++) {
 				String agentName = "Sensor" + i;
-				sensorsList.add(cc.createNewAgent(agentName, "examples.Sensor", args));
+				sensorsList.add(cc.createNewAgent(agentName, "edu.agh.io.industryOptimizer.examples.Sensor", args));
 			}
 			for(AgentController ac : sensorsList){
 				ac.start();
@@ -31,8 +31,8 @@ public class Product extends Agent {
 		} catch (StaleProxyException e) {
 			e.printStackTrace();
 		}
-		pressAnyKeyToContinue();
-		sendMessage("PR_INIT");
+//		pressAnyKeyToContinue();
+//		sendMessage("PR_INIT");
 		addBehaviour(new getMessages());
 	}
 	protected void takeDown() { //opcjonalnie
@@ -45,35 +45,44 @@ public class Product extends Agent {
 			if (mesg != null) {
 				String notice = mesg.getContent();
 				if(notice.split("_")[0].equals("PR")){
-					if(notice.split("_")[1].equals("READY")){
+                    if(notice.split("_")[1].equals("INIT")){
+                        sendMessage("PR_INIT");
+                        System.out.println("Process init");
+                    }
+					else if(notice.split("_")[1].equals("READY")){
 						sendMessage("PR_START");
-					}
+                        System.out.println("Process starting");
+                    }
 					else if(notice.split("_")[1].equals("STOP")){
 						sendMessage("PR_STOP");
-					}
+                        System.out.println("Process stop");
+                    }
 					else if(notice.split("_")[1].equals("FINALIZE")){
-						for(AgentController ac : sensorsList){
-							try {
-								ac.kill();
-							} catch (StaleProxyException e) {
-								e.printStackTrace();
-							}
-						}
+                        System.out.println("Process finalize");
+                        sendMessage("PR_FINALIZE");
+//						for(AgentController ac : sensorsList){
+//							try {
+//								ac.kill();
+//							} catch (StaleProxyException e) {
+//								e.printStackTrace();
+//							}
+//						}
 					}
 				}
 				else if(notice.split("_")[0].equals("DATA"))
 					System.out.println(notice.split("_")[1]);
 				else if(notice.split("_")[0].equals("EXIT")){
-					for(AgentController ac : sensorsList){
-						try {
-							if(ac.getName().equals(notice.split("_")[1])){
-								sensorsList.remove(sensorsList.indexOf(ac));
-								System.out.println("removed");
-							}
-						} catch (StaleProxyException e) {
-							e.printStackTrace();
-						}
-					}
+                    System.out.println("Process terminated");
+//					for(AgentController ac : sensorsList){
+//						try {
+//							if(ac.getName().equals(notice.split("_")[1])){
+//								sensorsList.remove(sensorsList.indexOf(ac));
+//                                System.out.println("removed");
+//							}
+//						} catch (StaleProxyException e) {
+//							e.printStackTrace();
+//						}
+//					}
 				}
 			}
 		}
@@ -105,6 +114,8 @@ public class Product extends Agent {
 			System.in.read();
 		}
 		catch(Exception e)
-		{}
+		{
+			// Ignore
+		}
 	}
 }
