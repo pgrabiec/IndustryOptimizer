@@ -1,4 +1,4 @@
-package edu.agh.io.industryOptimizer.examples;
+package edu.agh.io.industryOptimizer.agents;
 
 import jade.core.AID;
 import jade.core.Agent;
@@ -11,7 +11,7 @@ import jade.wrapper.StaleProxyException;
 
 import java.util.ArrayList;
 
-public class Product extends Agent {
+public class ProductionProcess extends Agent {
 	ArrayList<AgentController> sensorsList;
 	private int SENSOR_AGENTS_NUMBER = 2;
 
@@ -22,8 +22,8 @@ public class Product extends Agent {
 		try {
 			args[0] = this.getName().split("@")[0];
 			for(int i = 1; i <= SENSOR_AGENTS_NUMBER; i++) {
-				String agentName = "Sensor" + i;
-				sensorsList.add(cc.createNewAgent(agentName, "edu.agh.io.industryOptimizer.examples.Sensor", args));
+				String agentName = "UserInterface" + i;
+				sensorsList.add(cc.createNewAgent(agentName, "edu.agh.io.industryOptimizer.agents.UserInterface", args));
 			}
 			for(AgentController ac : sensorsList){
 				ac.start();
@@ -43,6 +43,7 @@ public class Product extends Agent {
 		public void action() {
 			ACLMessage mesg = myAgent.receive();
 			if (mesg != null) {
+				System.out.println("Received from: " + mesg.getSender().getName());
 				String notice = mesg.getContent();
 				if(notice.split("_")[0].equals("PR")){
                     if(notice.split("_")[1].equals("INIT")){

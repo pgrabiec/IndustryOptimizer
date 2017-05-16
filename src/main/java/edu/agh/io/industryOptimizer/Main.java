@@ -6,7 +6,7 @@ public class Main {
     public static void main(String[] args) {
         String[] arguments = new String[] {
                 "-gui",
-                "Product1:edu.agh.io.industryOptimizer.examples.Product"
+                "Product1:edu.agh.io.industryOptimizer.agents.ProductionProcess"
         };
 
         Boot.main(arguments);

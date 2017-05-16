@@ -1,19 +1,20 @@
-package edu.agh.io.industryOptimizer.examples;
+package edu.agh.io.industryOptimizer.agents;
 
+import edu.agh.io.industryOptimizer.agents.gui.UserInterfaceGUI;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 
-public class Sensor extends Agent {
-	private edu.agh.io.industryOptimizer.examples.SensorGui myGui;
+public class UserInterface extends Agent {
+	private UserInterfaceGUI myGui;
 	private String processName;
 	private int phase = 0;
 
 	@Override
     protected void setup() {
-		myGui = new edu.agh.io.industryOptimizer.examples.SensorGui(this);
+		myGui = new UserInterfaceGUI(this);
 		this.processName = this.getArguments()[0].toString();
         myGui.display();
 

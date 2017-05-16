@@ -1,4 +1,6 @@
-package edu.agh.io.industryOptimizer.examples;
+package edu.agh.io.industryOptimizer.agents.gui;
+
+import edu.agh.io.industryOptimizer.agents.UserInterface;
 
 import javax.swing.*;
 import java.awt.*;
@@ -7,8 +9,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-public class SensorGui extends JFrame {
-	private Sensor myAgent;
+public class UserInterfaceGUI extends JFrame {
+	private UserInterface myAgent;
 
 	private JButton addButton, phaseButton;
 	private JTextField titleField, valueField, unitField;
@@ -17,7 +19,7 @@ public class SensorGui extends JFrame {
 	private String[] phaseName = new String[]{"Oczekujacy", "Poczatek procesu",
 			"W trakcie wykonywania", "Koniec procesu", "Agent wylaczony"};
 		
-	SensorGui(Sensor a) {
+	public UserInterfaceGUI(UserInterface a) {
 		super(a.getLocalName());
 			
 		myAgent = a;
@@ -60,7 +62,7 @@ public class SensorGui extends JFrame {
 						valueField.setText("");
 						unitField.setText("");
 					} catch (Exception e) {
-						JOptionPane.showMessageDialog(SensorGui.this, "Nieprawidlowe wartosci. " + e.getMessage(), "B�ad", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showMessageDialog(UserInterfaceGUI.this, "Nieprawidlowe wartosci. " + e.getMessage(), "B�ad", JOptionPane.ERROR_MESSAGE);
 					}
 				}
 				else if(phase == 4){
@@ -77,7 +79,7 @@ public class SensorGui extends JFrame {
 					unitField.setText("");
 				}
 				catch (Exception e) {
-					JOptionPane.showMessageDialog(SensorGui.this, "Nieprawidlowe wartosci. " + e.getMessage(), "B�ad", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(UserInterfaceGUI.this, "Nieprawidlowe wartosci. " + e.getMessage(), "B�ad", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		});
