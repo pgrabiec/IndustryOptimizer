@@ -1,4 +1,4 @@
-package edu.agh.io.industryOptimizer.agents;
+package edu.agh.io.industryOptimizer.agents.interfaces;
 
 import edu.agh.io.industryOptimizer.messaging.CallbacksUtility;
 import jade.core.Agent;
@@ -9,6 +9,7 @@ public class InterfaceAgent extends Agent {
     private final CallbacksUtility utility = new CallbacksUtility();
 
     protected void setup() {
+
 
         addBehaviour(new CyclicBehaviour() {
             @Override
