@@ -1,7 +1,5 @@
 package edu.agh.io.industryOptimizer.messaging;
 
-import java.util.*;
-
 /**
  * Example use:
  *

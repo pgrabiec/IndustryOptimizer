@@ -1,122 +1,136 @@
 package edu.agh.io.industryOptimizer.agents;
 
+import edu.agh.io.industryOptimizer.messaging.CallbacksUtility;
+import edu.agh.io.industryOptimizer.messaging.CallbacksUtilityImpl;
+import edu.agh.io.industryOptimizer.messaging.DefaultMessage;
+import edu.agh.io.industryOptimizer.messaging.MessageType;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
-import jade.wrapper.AgentController;
-import jade.wrapper.ContainerController;
-import jade.wrapper.StaleProxyException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class ProductionProcess extends Agent {
-	ArrayList<AgentController> sensorsList;
-	private int SENSOR_AGENTS_NUMBER = 2;
+	private ArrayList<String> sensorsList;
+	private String batchAgent;
+	private CallbacksUtility utility = new CallbacksUtilityImpl();
+	private ProductionProcessState state;
+	private int agentMessagesCounter;
 
 	protected void setup() {
-		ContainerController cc = getContainerController();
-		sensorsList = new ArrayList<AgentController>();
-		String[] args = new String[1];
-		try {
-			args[0] = this.getName().split("@")[0];
-			for(int i = 1; i <= SENSOR_AGENTS_NUMBER; i++) {
-				String agentName = "UserInterface" + i;
-				sensorsList.add(cc.createNewAgent(agentName, "edu.agh.io.industryOptimizer.agents.UserInterface", args));
+		agentMessagesCounter = 0;
+		batchAgent = "test";
+		state = ProductionProcessState.WAITING;
+		sensorsList = new ArrayList<String>();
+
+		utility.addCallback(ProductionProcessState.WAITING, MessageType.PROCESS_INIT, message -> {
+			sendToAllSensors(MessageType.PROCESS_INIT, null);
+			state = ProductionProcessState.INITIALIZING;
+		});
+		utility.addCallback(ProductionProcessState.WAITING, MessageType.LINK_CONFIG, message -> {
+
+		});
+		utility.addCallback(ProductionProcessState.WAITING, MessageType.LINK_CONFIG, message -> {
+
+		});
+		utility.addCallback(ProductionProcessState.INITIALIZING, MessageType.PROCESS_READY, message -> {
+
+		});
+		utility.addCallback(ProductionProcessState.INITIALIZING, MessageType.PROCESS_DATA, message -> {
+			//DATA
+		});
+		utility.addCallback(ProductionProcessState.INITIALIZING, MessageType.PROCESS_START, message -> {
+			state = ProductionProcessState.EXECUTING;
+		});
+		utility.addCallback(ProductionProcessState.INITIALIZING, MessageType.BATCH_LAST, message -> {
+
+		});
+		utility.addCallback(ProductionProcessState.INITIALIZING, MessageType.BATCH_LAST, message -> {
+
+		});
+		utility.addCallback(ProductionProcessState.EXECUTING, MessageType.PROCESS_DATA, message -> {
+			//DATA
+		});
+		utility.addCallback(ProductionProcessState.EXECUTING, MessageType.PROCESS_FINISHED, message -> {
+
+		});
+		utility.addCallback(ProductionProcessState.EXECUTING, MessageType.PROCESS_STOP, message -> {
+			sendToAllSensors(MessageType.PROCESS_STOP, null);
+			state = ProductionProcessState.FINALIZING;
+		});
+		utility.addCallback(ProductionProcessState.FINALIZING, MessageType.PROCESS_DATA, message -> {
+			//DATA
+		});
+		utility.addCallback(ProductionProcessState.FINALIZING, MessageType.PROCESS_FINALIZE, message -> {
+			agentMessagesCounter++;
+			if(agentMessagesCounter == sensorsList.size()){
+				agentMessagesCounter = 0;
+				sendToAllSensors(MessageType.PROCESS_FINALIZE, null);
+				state = ProductionProcessState.EXPANDING;
+				System.out.println("Sending data to Product Batch Agent");
+				sendMessage(batchAgent, MessageType.BATCH_PRODUCED, "!!!!!!!!!!!!!!!!!!!!!!TODO");
+				state = ProductionProcessState.WAITING;
+				checkLinkConfigs();
 			}
-			for(AgentController ac : sensorsList){
-				ac.start();
-			}
-		} catch (StaleProxyException e) {
-			e.printStackTrace();
-		}
-//		pressAnyKeyToContinue();
-//		sendMessage("PR_INIT");
+		});
+		utility.addCallback(ProductionProcessState.FINALIZING, MessageType.PROCESS_FORCE_FINALIZE, message -> {
+			sendToAllSensors(MessageType.PROCESS_FINALIZE, null);
+			state = ProductionProcessState.EXPANDING;
+			System.out.println("Sending data to Product Batch Agent");
+			sendMessage(batchAgent, MessageType.BATCH_PRODUCED, "!!!!!!!!!!!!!!!!!!!!!!TODO");
+			state = ProductionProcessState.WAITING;
+			checkLinkConfigs();
+		});
+
 		addBehaviour(new getMessages());
+
 	}
-	protected void takeDown() { //opcjonalnie
-		// operacje wykonywane bezpo�rednio przed usuni�ciem agenta
+
+	private void checkLinkConfigs() {
+
+	}
+
+	protected void takeDown() {
+
 	}
 	
 	public class getMessages extends CyclicBehaviour {
 		public void action() {
 			ACLMessage mesg = myAgent.receive();
 			if (mesg != null) {
-				System.out.println("Received from: " + mesg.getSender().getName());
-				String notice = mesg.getContent();
-				if(notice.split("_")[0].equals("PR")){
-                    if(notice.split("_")[1].equals("INIT")){
-                        sendMessage("PR_INIT");
-                        System.out.println("Process init");
-                    }
-					else if(notice.split("_")[1].equals("READY")){
-						sendMessage("PR_START");
-                        System.out.println("Process starting");
-                    }
-					else if(notice.split("_")[1].equals("STOP")){
-						sendMessage("PR_STOP");
-                        System.out.println("Process stop");
-                    }
-					else if(notice.split("_")[1].equals("FINALIZE")){
-                        System.out.println("Process finalize\n__________________");
-                        sendMessage("PR_FINALIZE");
-//						for(AgentController ac : sensorsList){
-//							try {
-//								ac.kill();
-//							} catch (StaleProxyException e) {
-//								e.printStackTrace();
-//							}
-//						}
-					}
-				}
-				else if(notice.split("_")[0].equals("DATA"))
-					System.out.println(notice.split("_")[1]);
-				else if(notice.split("_")[0].equals("EXIT")){
-                    System.out.println("Process terminated");
-//					for(AgentController ac : sensorsList){
-//						try {
-//							if(ac.getName().equals(notice.split("_")[1])){
-//								sensorsList.remove(sensorsList.indexOf(ac));
-//                                System.out.println("removed");
-//							}
-//						} catch (StaleProxyException e) {
-//							e.printStackTrace();
-//						}
-//					}
-				}
+
 			}
 		}
 	}
 
-	public void sendMessage(final String message) {
+	private void sendToAllSensors(MessageType type, String content) {
+		addBehaviour((new OneShotBehaviour() {
+			@Override
+			public void action() {
+				for(String sensorName : sensorsList){
+					sendMessage(sensorName, type, content);
+				}
+			}
+		}));
+
+	}
+
+	private void sendMessage(String receiver, MessageType type, String content) {
 		addBehaviour(new OneShotBehaviour() {
 			public void action() {
-				for(AgentController ac : sensorsList) {
-					ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-					try {
-						msg.addReceiver(new AID(ac.getName().split("@")[0], AID.ISLOCALNAME));
-					} catch (StaleProxyException e) {
-						e.printStackTrace();
-					}
-					msg.setLanguage("Polish");
-					msg.setContent(message);
-					send(msg);
+				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+				msg.addReceiver(new AID(receiver, AID.ISLOCALNAME));
+				msg.setLanguage("Polish");
+				try {
+					msg.setContentObject(new DefaultMessage(type, content));
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
+				send(msg);
 			}
 		} );
-	}
-
-	private void pressAnyKeyToContinue()
-	{
-		System.out.println("Nacisnij dowolny przycisk aby zainicjowac proces produkcyjny.");
-		try
-		{
-			System.in.read();
-		}
-		catch(Exception e)
-		{
-			// Ignore
-		}
 	}
 }
