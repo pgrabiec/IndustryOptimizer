@@ -125,7 +125,7 @@ public class ProductionProcess extends Agent {
 				msg.addReceiver(new AID(receiver, AID.ISLOCALNAME));
 				msg.setLanguage("Polish");
 				try {
-					msg.setContentObject(new DefaultMessage(type, content));
+					msg.setContentObject(new DefaultMessage(type));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

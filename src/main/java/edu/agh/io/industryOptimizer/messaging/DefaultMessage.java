@@ -11,5 +11,4 @@ public abstract class DefaultMessage implements Message {
     public MessageType getMessageType() {
         return messageType;
     }
-
 }
