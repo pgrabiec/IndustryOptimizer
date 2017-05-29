@@ -21,28 +21,12 @@ import java.util.*;
  * messageCallback -> messageCallback.messageReceived("MSG")
  );
  * */
-public class CallbacksUtility {
-    private final Map<Object, Map<Object, List<MessageCallback>>> callbacksMap = new HashMap<>();
+public interface CallbacksUtility {
+    public void executeCallbacks(Object state, Object messageType, Object message);
 
-    public Collection<MessageCallback> getCallback(Object state, Object messageType) {
-        return callbacksMap
-                .computeIfAbsent(
-                        state,
-                        key -> new HashMap<>())
-                .getOrDefault(
-                        messageType,
-                        new LinkedList<>()
-                );
-    }
+    public void addCallback(Object state, Object messageType, MessageCallback callback);
 
-    public void addCallback(Object state, Object messageType, MessageCallback callback) {
-        callbacksMap
-                .computeIfAbsent(
-                        state,
-                        key -> new HashMap<>())
-                .computeIfAbsent(
-                        messageType,
-                        key -> new LinkedList<>())
-                .add(callback);
-    }
+    public void addCallbackAllStates(Object MessageType, MessageCallback callback);
+
+    public void removeCallback(MessageCallback callback);
 }
