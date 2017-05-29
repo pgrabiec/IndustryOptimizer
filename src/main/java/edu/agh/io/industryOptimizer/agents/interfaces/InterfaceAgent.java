@@ -3,7 +3,9 @@ package edu.agh.io.industryOptimizer.agents.interfaces;
 import edu.agh.io.industryOptimizer.AgentIdentifier;
 import edu.agh.io.industryOptimizer.agents.ProductionProcessState;
 import edu.agh.io.industryOptimizer.messaging.CallbacksUtility;
+import edu.agh.io.industryOptimizer.messaging.CallbacksUtilityImpl;
 import edu.agh.io.industryOptimizer.messaging.Message;
+import edu.agh.io.industryOptimizer.messaging.MessageType;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
@@ -12,7 +14,7 @@ import jade.lang.acl.UnreadableException;
 import java.io.Serializable;
 
 public class InterfaceAgent extends Agent {
-    private final CallbacksUtility utility = new CallbacksUtility();
+    private final CallbacksUtility utility = new CallbacksUtilityImpl();
 
     private ProductionProcessState state = ProductionProcessState.WAITING;
     private AgentIdentifier productionProcessId;
@@ -20,7 +22,22 @@ public class InterfaceAgent extends Agent {
 
     protected void setup() {
         utility.addCallback(
-                ProductionProcessState.WAITING);
+                ProductionProcessState.WAITING,
+                MessageType.PROCESS_INIT,
+                message -> {
+                    state = ProductionProcessState.INITIALIZING;
+                    initialize();
+                }
+        );
+
+        utility.addCallback(
+                ProductionProcessState.WAITING,
+                MessageType.LINK_CONFIG,
+                message -> {
+                    state = ProductionProcessState.INITIALIZING;
+                    initialize();
+                }
+        );
 
         addBehaviour(new CyclicBehaviour() {
             @Override
@@ -48,6 +65,9 @@ public class InterfaceAgent extends Agent {
         System.err.println("Received unknown message");
     }
 
+    private void initialize() {
+
+    }
 //
 //    protected void takeDown() {
 //
