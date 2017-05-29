@@ -4,7 +4,6 @@ import edu.agh.io.industryOptimizer.AgentIdentifier;
 import edu.agh.io.industryOptimizer.agents.ProductionProcessState;
 import edu.agh.io.industryOptimizer.messaging.CallbacksUtility;
 import edu.agh.io.industryOptimizer.messaging.CallbacksUtilityImpl;
-import edu.agh.io.industryOptimizer.messaging.Message;
 import edu.agh.io.industryOptimizer.messaging.MessageType;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
@@ -54,12 +53,12 @@ public class InterfaceAgent extends Agent {
         });
     }
 
-    private void handleMessage(Message message) {
-        utility.getCallback(state, message.getMessageType())
-                .forEach(callback ->
-                        callback.messageReceived(message.getContent())
-                );
-    }
+//    private void handleMessage(Message message) {
+//        utility.getCallback(state, message.getMessageType())
+//                .forEach(callback ->
+//                        callback.messageReceived(message.getContent())
+//                );
+//    }
 
     private void handleMessage(Serializable contentObject) {
         System.err.println("Received unknown message");

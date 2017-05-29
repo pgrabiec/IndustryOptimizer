@@ -1,20 +1,20 @@
 package edu.agh.io.industryOptimizer.agents;
 
-import edu.agh.io.industryOptimizer.messaging.CallbacksUtility;
-import edu.agh.io.industryOptimizer.messaging.CallbacksUtilityImpl;
-import edu.agh.io.industryOptimizer.messaging.DefaultMessage;
-import edu.agh.io.industryOptimizer.messaging.MessageType;
+import edu.agh.io.industryOptimizer.messaging.*;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.UnreadableException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ProductionProcess extends Agent {
 	private ArrayList<String> sensorsList;
+	private ArrayList<Message> configLinks;
 	private String batchAgent;
 	private CallbacksUtility utility = new CallbacksUtilityImpl();
 	private ProductionProcessState state;
@@ -23,19 +23,28 @@ public class ProductionProcess extends Agent {
 	protected void setup() {
 		agentMessagesCounter = 0;
 		batchAgent = "test";
-		state = ProductionProcessState.WAITING;
-		sensorsList = new ArrayList<String>();
+		state = ProductionProcessState.FINALIZING;
+
+		sensorsList = new ArrayList<>();
+		configLinks = new ArrayList<>();
 
 		utility.addCallback(ProductionProcessState.WAITING, MessageType.PROCESS_INIT, message -> {
 			sendToAllSensors(MessageType.PROCESS_INIT, null);
 			state = ProductionProcessState.INITIALIZING;
 		});
 		utility.addCallback(ProductionProcessState.WAITING, MessageType.LINK_CONFIG, message -> {
-
+			checkLinkConfigs();
 		});
-		utility.addCallback(ProductionProcessState.WAITING, MessageType.LINK_CONFIG, message -> {
 
-		});
+		utility.addCallbackAllStatesExcept(MessageType.LINK_CONFIG,
+				message -> {
+					configLinks.add((Message)message);
+				},
+				Arrays.asList(new ProductionProcessState[]{
+						ProductionProcessState.WAITING
+				})
+		);
+
 		utility.addCallback(ProductionProcessState.INITIALIZING, MessageType.PROCESS_READY, message -> {
 
 		});
@@ -90,7 +99,6 @@ public class ProductionProcess extends Agent {
 	}
 
 	private void checkLinkConfigs() {
-
 	}
 
 	protected void takeDown() {
@@ -101,9 +109,26 @@ public class ProductionProcess extends Agent {
 		public void action() {
 			ACLMessage mesg = myAgent.receive();
 			if (mesg != null) {
-
+				try {
+					handleMessage(mesg.getContentObject());
+				} catch (UnreadableException e) {
+					e.printStackTrace();
+				}
 			}
 		}
+	}
+
+	private void handleMessage(Object contentObject) {
+		System.out.println("test " + contentObject);
+		handleMessage(contentObject);
+	}
+
+	private void handleMessage(Message contentObject) {
+		utility.executeCallbacks(state, contentObject.getMessageType(), contentObject);
+	}
+
+	private void handleMessage(DefaultMessage contentObject) {
+		utility.executeCallbacks(state, contentObject.getMessageType(), contentObject);
 	}
 
 	private void sendToAllSensors(MessageType type, String content) {
@@ -125,7 +150,7 @@ public class ProductionProcess extends Agent {
 				msg.addReceiver(new AID(receiver, AID.ISLOCALNAME));
 				msg.setLanguage("Polish");
 				try {
-					msg.setContentObject(new DefaultMessage(type, content));
+					if(content.equals(null))msg.setContentObject(new DefaultMessage(type));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
