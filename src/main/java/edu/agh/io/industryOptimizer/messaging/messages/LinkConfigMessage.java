@@ -4,6 +4,7 @@ import edu.agh.io.industryOptimizer.AgentIdentifier;
 import edu.agh.io.industryOptimizer.messaging.DefaultMessage;
 import edu.agh.io.industryOptimizer.messaging.LinkConfigAgentType;
 import edu.agh.io.industryOptimizer.messaging.MessageType;
+import edu.agh.io.industryOptimizer.messaging.MessageVisitor;
 
 import java.util.Collection;
 
@@ -17,6 +18,11 @@ public class LinkConfigMessage extends DefaultMessage {
 
     public Collection<LinkConfigEntry> getConfiguration() {
         return configuration;
+    }
+
+    @Override
+    public void accept(MessageVisitor visitor) {
+        visitor.visitLinkConfigMessage(this);
     }
 
     public enum OperationType {

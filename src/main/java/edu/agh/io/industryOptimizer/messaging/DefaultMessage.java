@@ -1,6 +1,6 @@
 package edu.agh.io.industryOptimizer.messaging;
 
-public class DefaultMessage implements Message {
+public abstract class DefaultMessage implements Message {
     private final MessageType messageType;
 
     public DefaultMessage(MessageType messageType) {
@@ -11,5 +11,4 @@ public class DefaultMessage implements Message {
     public MessageType getMessageType() {
         return messageType;
     }
-
 }

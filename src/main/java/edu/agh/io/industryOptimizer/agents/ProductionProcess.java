@@ -1,6 +1,7 @@
 package edu.agh.io.industryOptimizer.agents;
 
 import edu.agh.io.industryOptimizer.messaging.*;
+import edu.agh.io.industryOptimizer.messaging.messages.ControlMessage;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
@@ -150,7 +151,7 @@ public class ProductionProcess extends Agent {
 				msg.addReceiver(new AID(receiver, AID.ISLOCALNAME));
 				msg.setLanguage("Polish");
 				try {
-					if(content.equals(null))msg.setContentObject(new DefaultMessage(type));
+					msg.setContentObject(new ControlMessage(type));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

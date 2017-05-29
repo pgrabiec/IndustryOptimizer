@@ -1,25 +1,23 @@
 package edu.agh.io.industryOptimizer.agents.interfaces;
 
 import edu.agh.io.industryOptimizer.AgentIdentifier;
+import edu.agh.io.industryOptimizer.agents.AbstractStatefulAgent;
 import edu.agh.io.industryOptimizer.agents.ProductionProcessState;
 import edu.agh.io.industryOptimizer.messaging.CallbacksUtility;
+<<<<<<< HEAD
 import edu.agh.io.industryOptimizer.messaging.CallbacksUtilityImpl;
+=======
+import edu.agh.io.industryOptimizer.messaging.Message;
+>>>>>>> bdcf2ac58e93787c9c58d44137b664fd10ca894f
 import edu.agh.io.industryOptimizer.messaging.MessageType;
-import jade.core.Agent;
-import jade.core.behaviours.CyclicBehaviour;
-import jade.lang.acl.ACLMessage;
-import jade.lang.acl.UnreadableException;
+import edu.agh.io.industryOptimizer.messaging.messages.LinkConfigMessage;
 
-import java.io.Serializable;
-
-public class InterfaceAgent extends Agent {
-    private final CallbacksUtility utility = new CallbacksUtilityImpl();
-
+public class InterfaceAgent extends AbstractStatefulAgent {
     private ProductionProcessState state = ProductionProcessState.WAITING;
     private AgentIdentifier productionProcessId;
 
-
-    protected void setup() {
+    @Override
+    protected void setupImpl(CallbacksUtility utility) {
         utility.addCallback(
                 ProductionProcessState.WAITING,
                 MessageType.PROCESS_INIT,
@@ -32,43 +30,43 @@ public class InterfaceAgent extends Agent {
         utility.addCallback(
                 ProductionProcessState.WAITING,
                 MessageType.LINK_CONFIG,
-                message -> {
-                    state = ProductionProcessState.INITIALIZING;
-                    initialize();
-                }
+                this::applyLinkConfig
         );
-
-        addBehaviour(new CyclicBehaviour() {
-            @Override
-            public void action() {
-                ACLMessage mesg = myAgent.receive();
-                if (mesg != null) {
-                    try {
-                        handleMessage(mesg.getContentObject());
-                    } catch (UnreadableException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
     }
 
+
+
+    private void applyLinkConfig(Object message) {}
+
+    private void applyLinkConfig(LinkConfigMessage message) {
+
+    }
+
+<<<<<<< HEAD
 //    private void handleMessage(Message message) {
 //        utility.getCallback(state, message.getMessageType())
 //                .forEach(callback ->
 //                        callback.messageReceived(message.getContent())
 //                );
 //    }
-
-    private void handleMessage(Serializable contentObject) {
-        System.err.println("Received unknown message");
-    }
-
+=======
     private void initialize() {
 
     }
-//
-//    protected void takeDown() {
-//
-//    }
+>>>>>>> bdcf2ac58e93787c9c58d44137b664fd10ca894f
+
+    @Override
+    protected ProductionProcessState getProcessState() {
+        return state;
+    }
+
+    @Override
+    public void visitMessage(Message message) {
+
+    }
+
+    @Override
+    public void visitLinkConfigMessage(LinkConfigMessage message) {
+
+    }
 }
