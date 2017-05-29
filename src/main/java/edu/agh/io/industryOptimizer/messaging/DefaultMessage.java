@@ -1,12 +1,10 @@
 package edu.agh.io.industryOptimizer.messaging;
 
-public class DefaultMessage implements Message {
+public abstract class DefaultMessage implements Message {
     private final MessageType messageType;
-    private final Object content;
 
-    public DefaultMessage(MessageType messageType, Object content) {
+    public DefaultMessage(MessageType messageType) {
         this.messageType = messageType;
-        this.content = content;
     }
 
     @Override
@@ -14,8 +12,4 @@ public class DefaultMessage implements Message {
         return messageType;
     }
 
-    @Override
-    public Object getContent() {
-        return content;
-    }
 }
