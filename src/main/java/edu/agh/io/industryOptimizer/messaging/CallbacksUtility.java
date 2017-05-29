@@ -3,9 +3,9 @@ package edu.agh.io.industryOptimizer.messaging;
 import java.util.*;
 
 public class CallbacksUtility {
-    private final Map<Object, Map<Object, List<Runnable>>> callbacksMap = new HashMap<>();
+    private final Map<Object, Map<Object, List<MessageCallback>>> callbacksMap = new HashMap<>();
 
-    public Collection<Runnable> getCallback(Object state, Object messageType) {
+    public Collection<MessageCallback> getCallback(Object state, Object messageType) {
         return callbacksMap
                 .computeIfAbsent(
                         state,
@@ -16,7 +16,7 @@ public class CallbacksUtility {
                 );
     }
 
-    public void addCallback(Object state, Object messageType, Runnable callback) {
+    public void addCallback(Object state, Object messageType, MessageCallback callback) {
         callbacksMap
                 .computeIfAbsent(
                         state,
