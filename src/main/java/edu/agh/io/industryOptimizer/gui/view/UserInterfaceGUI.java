@@ -1,6 +1,4 @@
-package edu.agh.io.industryOptimizer.agents.gui;
-
-import edu.agh.io.industryOptimizer.agents.UserInterface;
+package edu.agh.io.industryOptimizer.gui.view;
 
 import javax.swing.*;
 import java.awt.*;

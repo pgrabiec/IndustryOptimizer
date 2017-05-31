@@ -1,6 +1,6 @@
-package edu.agh.io.industryOptimizer.agents;
+package edu.agh.io.industryOptimizer.gui.view;
 
-import edu.agh.io.industryOptimizer.agents.gui.UserInterfaceGUI;
+import edu.agh.io.industryOptimizer.gui.view.UserInterfaceGUI;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;

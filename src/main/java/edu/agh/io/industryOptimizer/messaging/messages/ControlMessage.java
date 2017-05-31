@@ -1,16 +1,12 @@
 package edu.agh.io.industryOptimizer.messaging.messages;
 
-import edu.agh.io.industryOptimizer.messaging.DefaultMessage;
+import edu.agh.io.industryOptimizer.agents.AgentIdentifier;
+import edu.agh.io.industryOptimizer.messaging.AbstractMessage;
 import edu.agh.io.industryOptimizer.messaging.MessageType;
-import edu.agh.io.industryOptimizer.messaging.MessageVisitor;
 
-public class ControlMessage extends DefaultMessage {
-    public ControlMessage(MessageType messageType) {
-        super(messageType);
-    }
+public class ControlMessage extends AbstractMessage {
 
-    @Override
-    public void accept(MessageVisitor visitor) {
-        visitor.visitControlMessage(this);
+    public ControlMessage(MessageType messageType, AgentIdentifier sender) {
+        super(messageType, sender);
     }
 }

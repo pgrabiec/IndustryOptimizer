@@ -1,4 +1,4 @@
-package edu.agh.io.industryOptimizer;
+package edu.agh.io.industryOptimizer.agents;
 
 import java.io.Serializable;
 
