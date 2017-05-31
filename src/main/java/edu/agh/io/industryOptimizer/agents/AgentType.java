@@ -1,6 +1,6 @@
-package edu.agh.io.industryOptimizer.messaging;
+package edu.agh.io.industryOptimizer.agents;
 
-public enum LinkConfigAgentType {
+public enum AgentType {
     INTERFACE,
     PROCESS,
     BATCH,

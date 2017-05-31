@@ -1,38 +1,29 @@
 package edu.agh.io.industryOptimizer.messaging.messages;
 
-import edu.agh.io.industryOptimizer.messaging.DefaultMessage;
+import edu.agh.io.industryOptimizer.agents.AgentIdentifier;
+import edu.agh.io.industryOptimizer.messaging.AbstractMessage;
+import edu.agh.io.industryOptimizer.messaging.MessageHandler;
 import edu.agh.io.industryOptimizer.messaging.MessageType;
-import edu.agh.io.industryOptimizer.messaging.MessageVisitor;
+import edu.agh.io.industryOptimizer.model.data.Data;
 
 /**
  * Created by Tomasz on 29.05.2017.
  */
-public class DataMessage extends DefaultMessage{
-    private String resource;
-    private String value;
-    private String unit;
+public class DataMessage extends AbstractMessage {
+    private final Data data;
 
-    public String getResource() {
-        return resource;
+    public DataMessage(MessageType messageType, AgentIdentifier sender, Data data) {
+        super(messageType, sender);
+
+        this.data = data;
     }
 
-    public String getValue() {
-        return value;
-    }
-
-    public String getUnit() {
-        return unit;
-    }
-
-    public DataMessage(MessageType messageType, String resource, String value, String unit) {
-        super(messageType);
-        this.resource = resource;
-        this.value = value;
-        this.unit = unit;
+    public Data getData() {
+        return data;
     }
 
     @Override
-    public void accept(MessageVisitor visitor) {
-        visitor.visitDataMessage(this);
+    public void accept(MessageHandler messageHandler) {
+        messageHandler.handleMessage(this);
     }
 }
