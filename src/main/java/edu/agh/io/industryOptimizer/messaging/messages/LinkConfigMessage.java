@@ -1,10 +1,9 @@
 package edu.agh.io.industryOptimizer.messaging.messages;
 
-import edu.agh.io.industryOptimizer.messaging.AbstractMessage;
 import edu.agh.io.industryOptimizer.agents.AgentIdentifier;
 import edu.agh.io.industryOptimizer.agents.AgentType;
+import edu.agh.io.industryOptimizer.messaging.AbstractMessage;
 import edu.agh.io.industryOptimizer.messaging.MessageType;
-import edu.agh.io.industryOptimizer.messaging.MessageHandler;
 
 import java.util.Collection;
 
@@ -18,11 +17,6 @@ public class LinkConfigMessage extends AbstractMessage {
 
     public Collection<LinkConfigEntry> getConfiguration() {
         return configuration;
-    }
-
-    @Override
-    public void accept(MessageHandler messageHandler) {
-        messageHandler.handleMessage(this);
     }
 
     public enum OperationType {

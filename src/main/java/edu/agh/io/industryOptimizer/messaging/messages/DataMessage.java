@@ -2,7 +2,6 @@ package edu.agh.io.industryOptimizer.messaging.messages;
 
 import edu.agh.io.industryOptimizer.agents.AgentIdentifier;
 import edu.agh.io.industryOptimizer.messaging.AbstractMessage;
-import edu.agh.io.industryOptimizer.messaging.MessageHandler;
 import edu.agh.io.industryOptimizer.messaging.MessageType;
 import edu.agh.io.industryOptimizer.model.data.Data;
 
@@ -20,10 +19,5 @@ public class DataMessage extends AbstractMessage {
 
     public Data getData() {
         return data;
-    }
-
-    @Override
-    public void accept(MessageHandler messageHandler) {
-        messageHandler.handleMessage(this);
     }
 }

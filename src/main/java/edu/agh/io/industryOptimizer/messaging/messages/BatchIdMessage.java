@@ -3,7 +3,6 @@ package edu.agh.io.industryOptimizer.messaging.messages;
 import edu.agh.io.industryOptimizer.agents.AgentIdentifier;
 import edu.agh.io.industryOptimizer.messaging.AbstractMessage;
 import edu.agh.io.industryOptimizer.messaging.MessageType;
-import edu.agh.io.industryOptimizer.messaging.MessageHandler;
 import edu.agh.io.industryOptimizer.model.batch.BatchIdentifier;
 
 /**
@@ -19,10 +18,5 @@ public class BatchIdMessage extends AbstractMessage {
 
     public BatchIdentifier getBatchId() {
         return id;
-    }
-
-    @Override
-    public void accept(MessageHandler messageHandler) {
-        messageHandler.handleMessage(this);
     }
 }

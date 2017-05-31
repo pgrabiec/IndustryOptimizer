@@ -2,6 +2,7 @@ package edu.agh.io.industryOptimizer.messaging.util;
 
 import org.junit.Test;
 
+// TODO
 public class StatefulCallbacksUtilityImplTest {
     @Test
     public void testExecuteCallbacks() throws Exception {

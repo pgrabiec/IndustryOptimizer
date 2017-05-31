@@ -8,23 +8,25 @@ import org.mockito.Mockito;
 
 public class CallbacksUtilityImplTest {
     @Test
+    @SuppressWarnings("unchecked")
     public void testAddCallback() throws Exception {
         CallbacksUtility util = new CallbacksUtilityImpl();
 
-        MessageCallback callback = Mockito.mock(MessageCallback.class);
+        MessageCallback<Object> callback = Mockito.mock(MessageCallback.class);
 
-        util.addCallback(new Object(), callback);
+        util.addCallback(Object.class, new Object(), callback);
 
         Assert.assertTrue("Callback should have been added", util.contains(callback));
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testRemoveCallback() throws Exception {
         CallbacksUtility util = new CallbacksUtilityImpl();
 
         MessageCallback callback = Mockito.mock(MessageCallback.class);
 
-        util.addCallback(new Object(), callback);
+        util.addCallback(Object.class, new Object(), callback);
 
         Assert.assertTrue("Callback should have been added", util.contains(callback));
 
@@ -34,6 +36,7 @@ public class CallbacksUtilityImplTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testExecuteCallbacks() throws Exception {
         CallbacksUtility util = new CallbacksUtilityImpl();
 
@@ -45,8 +48,8 @@ public class CallbacksUtilityImplTest {
 
         MessageCallback callback = Mockito.mock(MessageCallback.class);
 
-        util.addCallback(types[0], callback);
-        util.addCallback(types[1], callback);
+        util.addCallback(Object.class, types[0], callback);
+        util.addCallback(Object.class, types[1], callback);
 
         Message message = Mockito.mock(Message.class);
 
