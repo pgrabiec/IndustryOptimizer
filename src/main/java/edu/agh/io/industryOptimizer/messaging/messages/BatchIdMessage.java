@@ -11,7 +11,7 @@ import edu.agh.io.industryOptimizer.model.batch.BatchIdentifier;
 public class BatchIdMessage extends AbstractMessage {
     private final BatchIdentifier id;
 
-    public BatchIdMessage(MessageType messageType, BatchIdentifier id, AgentIdentifier sender) {
+    public BatchIdMessage(MessageType messageType, AgentIdentifier sender, BatchIdentifier id) {
         super(messageType, sender);
         this.id = id;
     }
