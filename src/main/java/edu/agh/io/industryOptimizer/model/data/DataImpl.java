@@ -1,30 +1,31 @@
 package edu.agh.io.industryOptimizer.model.data;
 
-import edu.agh.io.industryOptimizer.model.units.Unit;
+import org.bson.Document;
 
 public class DataImpl implements Data {
-    private final String parameterName;
-    private final DataValue value;
-    private final Unit unit;
+    private final String name;
+    private final Document value;
 
-    public DataImpl(String parameterName, DataValue value, Unit unit) {
-        this.parameterName = parameterName;
+    public DataImpl(String name, Document value) {
+        this.name = name;
         this.value = value;
-        this.unit = unit;
     }
 
     @Override
-    public DataValue getValue() {
+    public String name() {
+        return null;
+    }
+
+    @Override
+    public Document value() {
+        return null;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Document getValue() {
         return value;
-    }
-
-    @Override
-    public String getParameterName() {
-        return parameterName;
-    }
-
-    @Override
-    public Unit getUnit() {
-        return unit;
     }
 }

@@ -1,9 +1,8 @@
 package edu.agh.io.industryOptimizer.model.data;
 
-import edu.agh.io.industryOptimizer.model.units.Unit;
+import org.bson.Document;
 
 public interface Data {
-    public String getParameterName();
-    public DataValue getValue();
-    public Unit getUnit();
+    public String name();
+    public Document value();
 }
