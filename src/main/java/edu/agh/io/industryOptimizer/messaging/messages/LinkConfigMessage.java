@@ -3,14 +3,16 @@ package edu.agh.io.industryOptimizer.messaging.messages;
 import edu.agh.io.industryOptimizer.agents.AgentIdentifier;
 import edu.agh.io.industryOptimizer.agents.AgentType;
 import edu.agh.io.industryOptimizer.messaging.AbstractMessage;
-import edu.agh.io.industryOptimizer.messaging.MessageType;
 
 import java.util.Collection;
 
 public class LinkConfigMessage extends AbstractMessage {
     private final Collection<LinkConfigEntry> configuration;
 
-    public LinkConfigMessage(MessageType messageType, Collection<LinkConfigEntry> configuration, AgentIdentifier sender) {
+    public LinkConfigMessage(
+            MessageType messageType,
+            Collection<LinkConfigEntry> configuration,
+            AgentIdentifier sender) {
         super(messageType, sender);
         this.configuration = configuration;
     }
@@ -45,5 +47,9 @@ public class LinkConfigMessage extends AbstractMessage {
         public AgentIdentifier getAgentIdentifier() {
             return agentIdentifier;
         }
+    }
+
+    public enum MessageType {
+        LINK_CONFIG
     }
 }

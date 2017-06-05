@@ -4,6 +4,7 @@ import edu.agh.io.industryOptimizer.agents.AbstractAgent;
 import edu.agh.io.industryOptimizer.agents.AgentIdentifier;
 import edu.agh.io.industryOptimizer.agents.AgentType;
 import edu.agh.io.industryOptimizer.messaging.MessageType;
+import edu.agh.io.industryOptimizer.messaging.messages.DocumentMessage;
 import edu.agh.io.industryOptimizer.messaging.messages.LinkConfigMessage;
 import edu.agh.io.industryOptimizer.messaging.messages.ResultMessage;
 import edu.agh.io.industryOptimizer.messaging.util.CallbacksUtility;
@@ -19,21 +20,21 @@ public class QueryHandlingAgent extends AbstractAgent {
 
         utility.addCallback(
                 LinkConfigMessage.class,
-                MessageType.LINK_CONFIG,
+                LinkConfigMessage.MessageType.LINK_CONFIG,
                 this::applyLinkConfig
         );
 
         utility.addCallback(
-                ResultMessage.class,
-                MessageType.ALGORITHMS,
+                DocumentMessage.class,
+                DocumentMessage.MessageType.ALGORITHMS,
                 message -> {
-                    //Show algorithms
+                    // TODO response with algorithms
                 }
         );
 
         utility.addCallback(
-                ResultMessage.class,
-                MessageType.OPTIMIZE_RESPONSE,
+                DocumentMessage.class,
+                DocumentMessage.MessageType.OPTIMIZE_RESPONSE,
                 message -> {
                     //Show optimization results
                 }

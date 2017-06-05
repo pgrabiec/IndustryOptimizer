@@ -38,7 +38,7 @@ public abstract class AbstractAgent extends Agent {
 
     protected void sendMessage(AgentIdentifier receiver, Message message) throws IOException {
         ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-        msg.addReceiver(new AID(receiver.getId(), AID.ISLOCALNAME));
+        msg.addReceiver(new AID(receiver.id(), AID.ISLOCALNAME));
         msg.setLanguage("English");
         msg.setContentObject(message);
 
@@ -50,7 +50,7 @@ public abstract class AbstractAgent extends Agent {
     }
 
     protected AgentIdentifier getMyId() {
-        return new AgentIdentifier(getAID().getName());
+        return new AgentIdentifierImpl(getAID().getName());
     }
 
     /**
