@@ -373,6 +373,7 @@ public class ProductionProcessAgent extends AbstractStatefulAgent {
     }
 
     private void applyLinkConfig(LinkConfigMessage config) {
+        System.out.println("Applying link config " + config);
         config.getConfiguration().forEach(linkConfigEntry -> {
             switch (linkConfigEntry.getAgentType()) {
                 case BATCH_INPUT:

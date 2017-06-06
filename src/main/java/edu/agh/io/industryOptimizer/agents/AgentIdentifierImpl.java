@@ -26,4 +26,11 @@ public class AgentIdentifierImpl implements AgentIdentifier {
     public int hashCode() {
         return id != null ? id.hashCode() : 0;
     }
+
+    @Override
+    public String toString() {
+        return "AgentIdentifierImpl{" +
+                "id='" + id + '\'' +
+                '}';
+    }
 }

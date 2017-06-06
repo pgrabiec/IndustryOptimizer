@@ -39,6 +39,14 @@ public abstract class AbstractAgent extends Agent {
                 }
             }
         });
+
+        addBehaviour(new OneShotBehaviour() {
+            @Override
+            public void action() {
+                System.out.println("starting");
+                started();
+            }
+        });
     }
 
     protected void sendMessage(AgentIdentifier receiver, Message message) throws IOException {
@@ -62,4 +70,6 @@ public abstract class AbstractAgent extends Agent {
      * For initializing the CallbacksUtility
      * */
     protected abstract void setupImpl(CallbacksUtility utility);
+
+    protected void started() {}
 }

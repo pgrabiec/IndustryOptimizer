@@ -48,9 +48,25 @@ public class LinkConfigMessage extends AbstractMessage implements Serializable {
         public AgentIdentifier getAgentIdentifier() {
             return agentIdentifier;
         }
+
+        @Override
+        public String toString() {
+            return "LinkConfigEntry{" +
+                    "operationType=" + operationType +
+                    ", agentType=" + agentType +
+                    ", agentIdentifier=" + agentIdentifier +
+                    '}';
+        }
     }
 
     public enum MessageType {
         LINK_CONFIG
+    }
+
+    @Override
+    public String toString() {
+        return "LinkConfigMessage{" +
+                "configuration=" + configuration +
+                '}';
     }
 }

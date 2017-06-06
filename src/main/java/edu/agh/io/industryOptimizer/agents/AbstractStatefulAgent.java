@@ -50,4 +50,7 @@ public abstract class AbstractStatefulAgent extends AbstractAgent {
     protected void setupImpl(CallbacksUtility utility) {
         setupImpl(this.utility);
     }
+
+    @Override
+    protected void started() {}
 }

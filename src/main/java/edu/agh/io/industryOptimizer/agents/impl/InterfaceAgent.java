@@ -8,6 +8,7 @@ import edu.agh.io.industryOptimizer.messaging.Message;
 import edu.agh.io.industryOptimizer.messaging.messages.DocumentMessage;
 import edu.agh.io.industryOptimizer.messaging.messages.LinkConfigMessage;
 import edu.agh.io.industryOptimizer.messaging.util.StatefulCallbacksUtility;
+import org.bson.Document;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -27,7 +28,9 @@ public abstract class InterfaceAgent extends AbstractStatefulAgent {
                 LinkConfigMessage.class,
                 ProductionProcessState.WAITING,
                 LinkConfigMessage.MessageType.LINK_CONFIG,
-                this::applyLinkConfig
+                message -> {
+                    applyLinkConfig(message);
+                }
         );
 
         utility.addCallbackExcept(
@@ -90,10 +93,12 @@ public abstract class InterfaceAgent extends AbstractStatefulAgent {
         preSetup();
 
         setState(ProductionProcessState.WAITING);
-        waiting();
+
+        started();
     }
 
     private void applyLinkConfig(LinkConfigMessage config) {
+        System.out.println("Applying link config " + config);
         config.getConfiguration().forEach(linkConfigEntry -> {
             if (!linkConfigEntry.getAgentType()
                     .equals(AgentType.PROCESS)) {
@@ -103,6 +108,7 @@ public abstract class InterfaceAgent extends AbstractStatefulAgent {
             switch (linkConfigEntry.getOperationType()) {
                 case LINK:
                     this.productionProcessId = linkConfigEntry.getAgentIdentifier();
+                    System.out.println("Assigned process " + productionProcessId);
                     break;
                 case UNLINK:
                     this.productionProcessId = null;
@@ -113,6 +119,7 @@ public abstract class InterfaceAgent extends AbstractStatefulAgent {
 
     protected void sendMessageToProcess(Message message) throws IOException {
         if (productionProcessId == null) {
+            System.out.println("Null process");
             return;
         }
 
