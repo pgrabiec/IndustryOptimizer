@@ -48,6 +48,7 @@ public class DocumentMessage extends AbstractMessage {
         PROCESS_DATA_RES_IN,
         PROCESS_DATA_RES_IN_OTHER,
         PROCESS_DATA_RES_OUT,
-        PROCESS_DATA_RES_OUT_OTHER
+        PROCESS_DATA_RES_OUT_OTHER,
+        BATCH_PROPERTIES
     }
 }

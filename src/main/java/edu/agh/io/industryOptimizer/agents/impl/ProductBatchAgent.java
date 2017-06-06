@@ -7,6 +7,10 @@ import edu.agh.io.industryOptimizer.messaging.messages.DocumentMessage;
 import edu.agh.io.industryOptimizer.messaging.messages.LinkConfigMessage;
 import edu.agh.io.industryOptimizer.messaging.util.CallbacksUtility;
 import edu.agh.io.industryOptimizer.model.batch.BatchIdentifier;
+import jade.domain.DFService;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.domain.FIPAException;
 import org.bson.Document;
 
 import java.io.IOException;
@@ -21,6 +25,8 @@ public class ProductBatchAgent extends AbstractAgent {
 
     @Override
     protected void setupImpl(CallbacksUtility utility) {
+
+        register();
 
         utility.addCallback(
                 LinkConfigMessage.class,
@@ -75,6 +81,14 @@ public class ProductBatchAgent extends AbstractAgent {
                     }
                 }
         );
+
+        utility.addCallback(
+                DocumentMessage.class,
+                DocumentMessage.MessageType.BATCH_PROPERTIES,
+                message -> {
+                    // TODO handle properties data
+                }
+        );
     }
 
     private void applyLinkConfig(LinkConfigMessage config) {
@@ -93,5 +107,20 @@ public class ProductBatchAgent extends AbstractAgent {
                     break;
             }
         });
+    }
+
+    private void register()
+    {
+        ServiceDescription sd  = new ServiceDescription();
+        sd.setType("batch");
+        sd.setName(getLocalName());
+        DFAgentDescription dfd = new DFAgentDescription();
+        dfd.setName(getAID());
+        dfd.addServices(sd);
+
+        try {
+            DFService.register(this, dfd );
+        }
+        catch (FIPAException fe) { fe.printStackTrace(); }
     }
 }
