@@ -25,7 +25,12 @@ public abstract class AbstractAgent extends Agent {
                 if (mesg != null) {
                     try {
                         Message message = (Message) mesg.getContentObject();
-                        utility.executeCallbacks(message.getMessageType(), message);
+                        addBehaviour(new OneShotBehaviour() {
+                            @Override
+                            public void action() {
+                                utility.executeCallbacks(message.getMessageType(), message);
+                            }
+                        });
                     } catch (UnreadableException e) {
                         e.printStackTrace();
                     } catch (ClassCastException e) {

@@ -14,6 +14,21 @@ public class ConsoleSensor extends InterfaceAgent {
     @Override
     protected void waiting() {
         System.out.println("Waiting");
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            sendMessageToProcess(new DocumentMessage(
+                    DocumentMessage.MessageType.PROCESS_INIT,
+                    getMyId(),
+                    new Document()
+            ));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

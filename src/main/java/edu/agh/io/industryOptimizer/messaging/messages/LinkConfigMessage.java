@@ -4,9 +4,10 @@ import edu.agh.io.industryOptimizer.agents.AgentIdentifier;
 import edu.agh.io.industryOptimizer.agents.AgentType;
 import edu.agh.io.industryOptimizer.messaging.AbstractMessage;
 
+import java.io.Serializable;
 import java.util.Collection;
 
-public class LinkConfigMessage extends AbstractMessage {
+public class LinkConfigMessage extends AbstractMessage implements Serializable {
     private final Collection<LinkConfigEntry> configuration;
 
     public LinkConfigMessage(
@@ -25,7 +26,7 @@ public class LinkConfigMessage extends AbstractMessage {
         LINK, UNLINK
     }
 
-    public class LinkConfigEntry {
+    public static class LinkConfigEntry implements Serializable {
         private final OperationType operationType;
         private final AgentType agentType;
         private final AgentIdentifier agentIdentifier;

@@ -2,7 +2,6 @@ package edu.agh.io.industryOptimizer.agents.impl;
 
 import edu.agh.io.industryOptimizer.agents.AbstractStatefulAgent;
 import edu.agh.io.industryOptimizer.agents.AgentIdentifier;
-import edu.agh.io.industryOptimizer.agents.AgentType;
 import edu.agh.io.industryOptimizer.agents.ProductionProcessState;
 import edu.agh.io.industryOptimizer.messaging.Message;
 import edu.agh.io.industryOptimizer.messaging.messages.DocumentMessage;
@@ -26,8 +25,8 @@ import java.util.Set;
 import static java.lang.Thread.sleep;
 
 public class ProductionProcessAgent extends AbstractStatefulAgent {
-    private final String type;
-    private final String name;
+    private String type;
+    private String name;
 
     private final Set<AgentIdentifier> allSensors = new HashSet<>();
     private final Set<AgentIdentifier> confirmedSensors = new HashSet<>();
@@ -44,11 +43,10 @@ public class ProductionProcessAgent extends AbstractStatefulAgent {
      * */
     private ProductionProcess productionProcess;
 
-    public ProductionProcessAgent(String type, String name) {
-        this.type = type;
-        this.name = name;
+    public ProductionProcessAgent() {
+        name = getLocalName();
+        type = "unknown";
     }
-
 
     private void sendToAllSensors(Message message) {
 		addBehaviour((new OneShotBehaviour() {
@@ -68,6 +66,21 @@ public class ProductionProcessAgent extends AbstractStatefulAgent {
 
 	@Override
 	protected void setupImpl(StatefulCallbacksUtility utility) {
+        Object[] arguments = getArguments();
+
+        if (arguments.length == 2) {
+            try {
+                type = (String) arguments[0];
+            } catch (ClassCastException e) {
+                type = "unknown";
+            }
+            try {
+                name = (String) arguments[1];
+            } catch (ClassCastException e) {
+                name = getLocalName();
+            }
+        }
+
     	// WAITING
 		utility.addCallback(
 		        DocumentMessage.class,
