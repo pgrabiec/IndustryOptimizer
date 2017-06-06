@@ -1,13 +1,14 @@
 package edu.agh.io.industryOptimizer.model.batch;
 
 
+import edu.agh.io.industryOptimizer.model.Identifier;
 import org.bson.Document;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public class BatchImpl implements Batch {
-    private final BatchIdentifier id;
+    private final Identifier id;
     private final String name;
     private final String type;
 
@@ -15,7 +16,7 @@ public class BatchImpl implements Batch {
 
     private final List<Document> properties = new LinkedList<>();
 
-    public BatchImpl(BatchIdentifier id, String name, String type) {
+    public BatchImpl(Identifier id, String name, String type) {
         this.id = id;
         this.name = name;
         this.type = type;
@@ -29,7 +30,7 @@ public class BatchImpl implements Batch {
     }
 
     @Override
-    public BatchIdentifier id() {
+    public Identifier id() {
         return id;
     }
 

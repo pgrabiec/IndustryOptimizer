@@ -1,7 +1,8 @@
 package edu.agh.io.industryOptimizer.model.process;
 
-import edu.agh.io.industryOptimizer.model.batch.BatchIdentifier;
+import edu.agh.io.industryOptimizer.model.Identifier;
 import org.bson.Document;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -14,10 +15,10 @@ public class ProductionProcessImpl implements ProductionProcess {
     private final List<Document> controlParameters = new LinkedList<>();
     private final List<Document> outputParameters = new LinkedList<>();
 
-    private final List<BatchIdentifier> inputBatches = new LinkedList<>();
+    private final List<Identifier> inputBatches = new LinkedList<>();
     private final List<Document> otherInput = new LinkedList<>();
 
-    private final List<BatchIdentifier> outputBatches = new LinkedList<>();
+    private final List<Identifier> outputBatches = new LinkedList<>();
     private final List<Document> otherOutput = new LinkedList<>();
 
 
@@ -53,7 +54,7 @@ public class ProductionProcessImpl implements ProductionProcess {
     }
 
     @Override
-    public List<BatchIdentifier> inputBatches() {
+    public List<Identifier> inputBatches() {
         return inputBatches;
     }
 
@@ -63,12 +64,37 @@ public class ProductionProcessImpl implements ProductionProcess {
     }
 
     @Override
-    public List<BatchIdentifier> outputBatches() {
+    public List<Identifier> outputBatches() {
         return outputBatches;
     }
 
     @Override
     public List<Document> otherOutput() {
         return otherOutput;
+    }
+
+    @Override
+    public Document toDocument() {
+        Document document = new Document();
+
+        document.put("_id", id.toString());
+        document.put("name", name);
+        document.put("type", type);
+
+        document.put("control_parameters", controlParameters);
+        document.put("output_parameters", name);
+
+        document.put("input_batches", name);
+        document.put("input_other", name);
+
+        document.put("output_batches", name);
+        document.put("output_other", name);
+
+        return document;
+    }
+
+    public static ProductionProcess fromDocument() {
+        // TODO - implement
+        throw new NotImplementedException();
     }
 }

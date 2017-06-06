@@ -1,9 +1,9 @@
 package edu.agh.io.industryOptimizer.model.process;
 
-import edu.agh.io.industryOptimizer.model.AbstractIdentifier;
+import edu.agh.io.industryOptimizer.model.DefaultIdentifier;
 import org.bson.types.ObjectId;
 
-public class ProductionProcessIdentifier extends AbstractIdentifier {
+public class ProductionProcessIdentifier extends DefaultIdentifier {
     public ProductionProcessIdentifier(ObjectId id) {
         super(id);
     }

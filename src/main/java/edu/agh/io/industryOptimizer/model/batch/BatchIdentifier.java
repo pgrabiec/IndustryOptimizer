@@ -1,9 +1,9 @@
 package edu.agh.io.industryOptimizer.model.batch;
 
-import edu.agh.io.industryOptimizer.model.AbstractIdentifier;
+import edu.agh.io.industryOptimizer.model.DefaultIdentifier;
 import org.bson.types.ObjectId;
 
-public class BatchIdentifier extends AbstractIdentifier {
+public class BatchIdentifier extends DefaultIdentifier {
     public BatchIdentifier(ObjectId id) {
         super(id);
     }
