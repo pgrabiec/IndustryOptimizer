@@ -42,9 +42,12 @@ public class DocumentMessage extends AbstractMessage {
         DATA_RESPONSE,
         PROCESS_DATA_REQUEST,
         PROCESS_FINISHED,
+        PROCESS_DATA,
         PROCESS_DATA_PARAM_CONTROL,
         PROCESS_DATA_PARAM_OUT,
         PROCESS_DATA_RES_IN,
-        PROCESS_DATA_RES_OUT
+        PROCESS_DATA_RES_IN_OTHER,
+        PROCESS_DATA_RES_OUT,
+        PROCESS_DATA_RES_OUT_OTHER
     }
 }

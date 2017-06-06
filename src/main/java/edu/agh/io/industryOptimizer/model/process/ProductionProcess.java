@@ -1,7 +1,7 @@
 package edu.agh.io.industryOptimizer.model.process;
 
 import edu.agh.io.industryOptimizer.model.batch.BatchIdentifier;
-import edu.agh.io.industryOptimizer.model.data.Data;
+import org.bson.Document;
 
 import java.io.Serializable;
 import java.util.List;
@@ -11,12 +11,12 @@ public interface ProductionProcess extends Serializable {
     public String name();
     public String type();
 
-    public List<Data> controlParameters();
-    public List<Data> outputParameters();
+    public List<Document> controlParameters();
+    public List<Document> outputParameters();
 
     public List<BatchIdentifier> inputBatches();
-    public List<Data> otherInput();
+    public List<Document> otherInput();
 
     public List<BatchIdentifier> outputBatches();
-    public List<Data> otherOutput();
+    public List<Document> otherOutput();
 }

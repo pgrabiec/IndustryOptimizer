@@ -1,7 +1,7 @@
 package edu.agh.io.industryOptimizer.model.process;
 
 import edu.agh.io.industryOptimizer.model.batch.BatchIdentifier;
-import edu.agh.io.industryOptimizer.model.data.Data;
+import org.bson.Document;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -11,14 +11,14 @@ public class ProductionProcessImpl implements ProductionProcess {
     private final String name;
     private final String type;
 
-    private final List<Data> controlParameters = new LinkedList<>();
-    private final List<Data> outputParameters = new LinkedList<>();
+    private final List<Document> controlParameters = new LinkedList<>();
+    private final List<Document> outputParameters = new LinkedList<>();
 
     private final List<BatchIdentifier> inputBatches = new LinkedList<>();
-    private final List<Data> otherInput = new LinkedList<>();
+    private final List<Document> otherInput = new LinkedList<>();
 
     private final List<BatchIdentifier> outputBatches = new LinkedList<>();
-    private final List<Data> otherOutput = new LinkedList<>();
+    private final List<Document> otherOutput = new LinkedList<>();
 
 
     public ProductionProcessImpl(ProductionProcessIdentifier identifier, String name, String type) {
@@ -43,12 +43,12 @@ public class ProductionProcessImpl implements ProductionProcess {
     }
 
     @Override
-    public List<Data> controlParameters() {
+    public List<Document> controlParameters() {
         return controlParameters;
     }
 
     @Override
-    public List<Data> outputParameters() {
+    public List<Document> outputParameters() {
         return outputParameters;
     }
 
@@ -58,7 +58,7 @@ public class ProductionProcessImpl implements ProductionProcess {
     }
 
     @Override
-    public List<Data> otherInput() {
+    public List<Document> otherInput() {
         return otherInput;
     }
 
@@ -68,7 +68,7 @@ public class ProductionProcessImpl implements ProductionProcess {
     }
 
     @Override
-    public List<Data> otherOutput() {
+    public List<Document> otherOutput() {
         return otherOutput;
     }
 }

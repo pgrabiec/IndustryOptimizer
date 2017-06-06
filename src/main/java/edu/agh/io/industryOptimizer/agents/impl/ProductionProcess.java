@@ -7,7 +7,6 @@ import edu.agh.io.industryOptimizer.agents.ProductionProcessState;
 import edu.agh.io.industryOptimizer.messaging.Message;
 import edu.agh.io.industryOptimizer.messaging.messages.*;
 import edu.agh.io.industryOptimizer.messaging.util.StatefulCallbacksUtility;
-import edu.agh.io.industryOptimizer.model.data.Data;
 import jade.core.behaviours.OneShotBehaviour;
 import org.bson.Document;
 
@@ -20,11 +19,11 @@ public class ProductionProcess extends AbstractStatefulAgent {
     private final Set<AgentIdentifier> allSensors = new HashSet<>();
     private final Set<AgentIdentifier> confirmedSensors = new HashSet<>();
 
-    private final Map<ProductionProcessState, List<Data>> dataMap = new HashMap<>();
+    private final Map<ProductionProcessState, List<Document>> dataMap = new HashMap<>();
 
-    private final List<Data> initData = new ArrayList<>();
-    private final List<Data> execData = new ArrayList<>();
-    private final List<Data> finalData = new ArrayList<>();
+    private final List<Document> initData = new ArrayList<>();
+    private final List<Document> execData = new ArrayList<>();
+    private final List<Document> finalData = new ArrayList<>();
 
     private final ArrayList<LinkConfigMessage> configLinksPending = new ArrayList<>();
 
@@ -70,54 +69,55 @@ public class ProductionProcess extends AbstractStatefulAgent {
         });
 
         utility.addCallback(
-            LinkConfigMessage.class,
-            ProductionProcessState.WAITING,
-            MessageType.LINK_CONFIG,
-            this::applyLinkConfig);
+                LinkConfigMessage.class,
+                ProductionProcessState.WAITING,
+                LinkConfigMessage.MessageType.LINK_CONFIG,
+                this::applyLinkConfig);
 
         utility.addCallbackExcept(
             LinkConfigMessage.class,
             Arrays.asList(new ProductionProcessState[] {
                     ProductionProcessState.WAITING
             }),
-            MessageType.LINK_CONFIG,
+            LinkConfigMessage.MessageType.LINK_CONFIG,
             configLinksPending::add);
 
         // INITIALIZING
 
         utility.addCallback(
-            ControlMessage.class,
+            DocumentMessage.class,
             ProductionProcessState.INITIALIZING,
-            MessageType.PROCESS_READY,
+            DocumentMessage.MessageType.PROCESS_READY,
             message -> addSensorConfirmation(
                 message.getSender(),
                 () -> {
                     clearConfirmation();
                     setState(ProductionProcessState.EXECUTING);
                     sendToAllSensors(
-                        new ControlMessage(
-                            MessageType.PROCESS_START,
-                            getMyId())
+                        new DocumentMessage(
+                                DocumentMessage.MessageType.PROCESS_START,
+                                getMyId(),
+                                new Document())
                     );
                 }
             ));
 
         utility.addCallback(
-            DataMessage.class,
+            DocumentMessage.class,
             ProductionProcessState.INITIALIZING,
-            MessageType.PROCESS_DATA,
+            DocumentMessage.MessageType.PROCESS_DATA,
             this::handleData);
 
         utility.addCallback(
-            ControlMessage.class,
+            DocumentMessage.class,
             ProductionProcessState.INITIALIZING,
-            MessageType.PROCESS_START,
+            DocumentMessage.MessageType.PROCESS_START,
             message -> {
                 clearConfirmation();
                 setState(ProductionProcessState.EXECUTING);
                 sendToAllSensors(
-                    new ControlMessage(
-                        MessageType.PROCESS_START,
+                    new DocumentMessage(
+                        DocumentMessage.MessageType.PROCESS_START,
                         getMyId())
                 );
             });
@@ -125,7 +125,7 @@ public class ProductionProcess extends AbstractStatefulAgent {
         utility.addCallback(
             BatchIdMessage.class,
             ProductionProcessState.INITIALIZING,
-            MessageType.BATCH_LAST,
+            DocumentMessage.MessageType.BATCH_LAST,
             message -> {
                 if (persistenceAgent == null) {
                     System.out.println("Received batch id but no persistence present");
@@ -143,7 +143,7 @@ public class ProductionProcess extends AbstractStatefulAgent {
         utility.addCallback(
             BatchIdMessage.class,
             ProductionProcessState.INITIALIZING,
-            MessageType.BATCH_NEW,
+            DocumentMessage.MessageType.BATCH_NEW,
             message -> {
                 if (persistenceAgent == null) {
                     System.out.println("Received batch id but no persistence present");
@@ -161,38 +161,38 @@ public class ProductionProcess extends AbstractStatefulAgent {
         // EXECUTING
 
         utility.addCallback(
-            DataMessage.class,
+            DocumentMessage.class,
             ProductionProcessState.EXECUTING,
-            MessageType.PROCESS_DATA,
+            DocumentMessage.MessageType.PROCESS_DATA,
             this::handleData);
 
         utility.addCallback(
-            ControlMessage.class,
+            DocumentMessage.class,
             ProductionProcessState.EXECUTING,
-            MessageType.PROCESS_FINISHED,
+            DocumentMessage.MessageType.PROCESS_FINISHED,
             message -> addSensorConfirmation(
                 message.getSender(),
                 () -> {
                     clearConfirmation();
                     setState(ProductionProcessState.FINALIZING);
                     sendToAllSensors(
-                        new ControlMessage(
-                            MessageType.PROCESS_STOP,
+                        new DocumentMessage(
+                            DocumentMessage.MessageType.PROCESS_STOP,
                             getMyId())
                     );
                 }
             ));
 
         utility.addCallback(
-            ControlMessage.class,
+            DocumentMessage.class,
             ProductionProcessState.EXECUTING,
-            MessageType.PROCESS_STOP,
+            DocumentMessage.MessageType.PROCESS_STOP,
             message -> {
                 clearConfirmation();
                 setState(ProductionProcessState.FINALIZING);
                 sendToAllSensors(
-                    new ControlMessage(
-                        MessageType.PROCESS_STOP,
+                    new DocumentMessage(
+                        DocumentMessage.MessageType.PROCESS_STOP,
                         getMyId())
                 );
             });
@@ -200,38 +200,38 @@ public class ProductionProcess extends AbstractStatefulAgent {
         // FINALIZING
 
         utility.addCallback(
-                DataMessage.class,
+                DocumentMessage.class,
                 ProductionProcessState.FINALIZING,
-                MessageType.PROCESS_DATA,
+                DocumentMessage.MessageType.PROCESS_DATA,
                 this::handleData);
 
         utility.addCallback(
-                ControlMessage.class,
+                DocumentMessage.class,
                 ProductionProcessState.FINALIZING,
-                MessageType.PROCESS_FINALIZE,
+                DocumentMessage.MessageType.PROCESS_FINALIZE,
                 message -> addSensorConfirmation(
                     message.getSender(),
                     () -> {
                         clearConfirmation();
                         setState(ProductionProcessState.EXPANDING);
                         sendToAllSensors(
-                            new ControlMessage(
-                                MessageType.PROCESS_FINALIZE,
+                            new DocumentMessage(
+                                DocumentMessage.MessageType.PROCESS_FINALIZE,
                                 getMyId())
                         );
                     }
                 ));
 
         utility.addCallback(
-                ControlMessage.class,
+                DocumentMessage.class,
                 ProductionProcessState.FINALIZING,
-                MessageType.PROCESS_FORCE_FINALIZE,
+                DocumentMessage.MessageType.PROCESS_FORCE_FINALIZE,
                 message -> {
                     clearConfirmation();
                     setState(ProductionProcessState.EXPANDING);
                     sendToAllSensors(
-                        new ControlMessage(
-                            MessageType.PROCESS_FINALIZE,
+                        new DocumentMessage(
+                            DocumentMessage.MessageType.PROCESS_FINALIZE,
                             getMyId())
                     );
                     try {
@@ -251,13 +251,13 @@ public class ProductionProcess extends AbstractStatefulAgent {
 
 	private void sendData(/* process data parameters here */){
         try {
-            sendMessage(persistenceAgent, new ProcessDataMessage(MessageType.PROCESS_DATA, getMyId()));
+            sendMessage(persistenceAgent, new DocumentMessage(DocumentMessage.MessageType.PROCESS_DATA, getMyId()));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-	private void handleData(DataMessage message) {
+	private void handleData(DocumentMessage message) {
         if (persistenceAgent == null) {
             System.out.println("Received process data but no persistence present");
             dataMap.get(getProcessState()).add(message.getData());

@@ -1,6 +1,7 @@
 package edu.agh.io.industryOptimizer.model.batch;
 
-import edu.agh.io.industryOptimizer.model.data.Data;
+
+import org.bson.Document;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -10,9 +11,9 @@ public class BatchImpl implements Batch {
     private final String name;
     private final String type;
 
-    private Data quantity;
+    private Document quantity;
 
-    private final List<Data> properties = new LinkedList<>();
+    private final List<Document> properties = new LinkedList<>();
 
     public BatchImpl(BatchIdentifier id, String name, String type) {
         this.id = id;
@@ -20,7 +21,7 @@ public class BatchImpl implements Batch {
         this.type = type;
     }
 
-    public BatchImpl(BatchIdentifier id, String name, String type, Data quantity) {
+    public BatchImpl(BatchIdentifier id, String name, String type, Document quantity) {
         this.id = id;
         this.name = name;
         this.type = type;
@@ -43,16 +44,16 @@ public class BatchImpl implements Batch {
     }
 
     @Override
-    public Data quantity() {
+    public Document quantity() {
         return quantity;
     }
 
     @Override
-    public List<Data> properties() {
+    public List<Document> properties() {
         return properties;
     }
 
-    public void setQuantity(Data quantity) {
+    public void setQuantity(Document quantity) {
         this.quantity = quantity;
     }
 }
