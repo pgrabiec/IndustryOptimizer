@@ -1,10 +1,9 @@
 package edu.agh.io.industryOptimizer.agents.impl;
 
 import edu.agh.io.industryOptimizer.agents.AbstractAgent;
-import edu.agh.io.industryOptimizer.messaging.MessageType;
-import edu.agh.io.industryOptimizer.messaging.messages.RequestMessage;
-import edu.agh.io.industryOptimizer.messaging.messages.ResultMessage;
+import edu.agh.io.industryOptimizer.messaging.messages.DocumentMessage;
 import edu.agh.io.industryOptimizer.messaging.util.CallbacksUtility;
+import org.bson.Document;
 
 import java.io.IOException;
 
@@ -18,8 +17,8 @@ public class DataAnalysisAgent extends AbstractAgent {
     protected void setupImpl(CallbacksUtility utility) {
 
         utility.addCallback(
-                RequestMessage.class,
-                MessageType.ANALYSIS_REQUEST,
+                DocumentMessage.class,
+                DocumentMessage.MessageType.ANALYSIS_REQUEST,
                 message -> {
                     //Analyse goes here
                     try {
@@ -30,7 +29,10 @@ public class DataAnalysisAgent extends AbstractAgent {
 
                     try {
                         sendMessage(message.getSender(),
-                                new ResultMessage(MessageType.ANALYSIS_RESPONSE, getMyId()));
+                                new DocumentMessage(
+                                        DocumentMessage.MessageType.ANALYSIS_RESPONSE,
+                                        getMyId(),
+                                        new Document()));
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

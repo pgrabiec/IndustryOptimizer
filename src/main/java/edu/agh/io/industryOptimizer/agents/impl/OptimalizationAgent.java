@@ -3,9 +3,10 @@ package edu.agh.io.industryOptimizer.agents.impl;
 import edu.agh.io.industryOptimizer.agents.AbstractAgent;
 import edu.agh.io.industryOptimizer.agents.AgentIdentifier;
 import edu.agh.io.industryOptimizer.agents.AgentType;
-import edu.agh.io.industryOptimizer.messaging.MessageType;
-import edu.agh.io.industryOptimizer.messaging.messages.*;
+import edu.agh.io.industryOptimizer.messaging.messages.DocumentMessage;
+import edu.agh.io.industryOptimizer.messaging.messages.LinkConfigMessage;
 import edu.agh.io.industryOptimizer.messaging.util.CallbacksUtility;
+import org.bson.Document;
 
 import java.io.IOException;
 
@@ -23,19 +24,22 @@ public class OptimalizationAgent extends AbstractAgent {
 
         utility.addCallback(
                 LinkConfigMessage.class,
-                MessageType.LINK_CONFIG,
+                LinkConfigMessage.MessageType.LINK_CONFIG,
                 this::applyLinkConfig
         );
 
         utility.addCallback(
-                RequestMessage.class,
-                MessageType.ALGORITHMS,
+                DocumentMessage.class,
+                DocumentMessage.MessageType.ALGORITHMS,
                 message -> {
                     //get algorithms
                     queryAgent = message.getSender();
                     try {
                         sendMessage(message.getSender(),
-                                new ResultMessage(MessageType.ALGORITHMS, getMyId()));
+                                new DocumentMessage(
+                                        DocumentMessage.MessageType.ALGORITHMS,
+                                        getMyId(),
+                                        new Document()));
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -43,13 +47,15 @@ public class OptimalizationAgent extends AbstractAgent {
         );
 
         utility.addCallback(
-                RequestMessage.class,
-                MessageType.OPTIMIZE_REQUEST,
+                DocumentMessage.class,
+                DocumentMessage.MessageType.OPTIMIZE_REQUEST,
                 message -> {
                     queryAgent = message.getSender();
                     try {
                         sendMessage(algorithmsAgent,
-                                new ResultMessage(MessageType.DEDUCE_REQUEST, getMyId()));
+                                new DocumentMessage(DocumentMessage.MessageType.DEDUCE_REQUEST,
+                                        getMyId(),
+                                        new Document()));
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -58,13 +64,16 @@ public class OptimalizationAgent extends AbstractAgent {
         );
 
         utility.addCallback(
-                RequestMessage.class,
-                MessageType.ANALYSIS_REQUEST,
+                DocumentMessage.class,
+                DocumentMessage.MessageType.ANALYSIS_REQUEST,
                 message -> {
                     queryAgent = message.getSender();
                     try {
                         sendMessage(algorithmsAgent,
-                                new ResultMessage(MessageType.ANALYSIS_REQUEST, getMyId()));
+                                new DocumentMessage(
+                                        DocumentMessage.MessageType.ANALYSIS_REQUEST,
+                                        getMyId(),
+                                        new Document()));
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -73,13 +82,16 @@ public class OptimalizationAgent extends AbstractAgent {
         );
 
         utility.addCallback(
-                RequestMessage.class,
-                MessageType.DATA_REQUEST,
+                DocumentMessage.class,
+                DocumentMessage.MessageType.DATA_REQUEST,
                 message -> {
                     queryAgent = message.getSender();
                     try {
                         sendMessage(persistenceAgent,
-                                new ResultMessage(MessageType.ANALYSIS_REQUEST, getMyId()));
+                                new DocumentMessage(
+                                        DocumentMessage.MessageType.ANALYSIS_REQUEST,
+                                        getMyId(),
+                                        new Document()));
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -89,12 +101,15 @@ public class OptimalizationAgent extends AbstractAgent {
         );
 
         utility.addCallback(
-                DataMessage.class,
-                MessageType.BATCH_DATA_RESPONSE,
+                DocumentMessage.class,
+                DocumentMessage.MessageType.BATCH_DATA_RESPONSE,
                 message -> {
                     try {
                         sendMessage(queryAgent,
-                                new ResultMessage(MessageType.DATA_RESPONSE, getMyId()));
+                                new DocumentMessage(
+                                        DocumentMessage.MessageType.DATA_RESPONSE,
+                                        getMyId(),
+                                        new Document()));
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -103,12 +118,15 @@ public class OptimalizationAgent extends AbstractAgent {
         );
 
         utility.addCallback(
-                DataMessage.class,
-                MessageType.PROCESS_DATA_RESPONSE,
+                DocumentMessage.class,
+                DocumentMessage.MessageType.PROCESS_DATA_RESPONSE,
                 message -> {
                     try {
                         sendMessage(queryAgent,
-                                new ResultMessage(MessageType.DATA_RESPONSE, getMyId()));
+                                new DocumentMessage(
+                                        DocumentMessage.MessageType.DATA_RESPONSE,
+                                        getMyId(),
+                                        new Document()));
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -117,12 +135,15 @@ public class OptimalizationAgent extends AbstractAgent {
         );
 
         utility.addCallback(
-                ResultMessage.class,
-                MessageType.ANALYSIS_RESPONSE,
+                DocumentMessage.class,
+                DocumentMessage.MessageType.ANALYSIS_RESPONSE,
                 message -> {
                     try {
                         sendMessage(queryAgent,
-                                new ResultMessage(MessageType.ANALYSIS_RESPONSE, getMyId()));
+                                new DocumentMessage(
+                                        DocumentMessage.MessageType.ANALYSIS_RESPONSE,
+                                        getMyId(),
+                                        new Document()));
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -131,12 +152,15 @@ public class OptimalizationAgent extends AbstractAgent {
         );
 
         utility.addCallback(
-                ResultMessage.class,
-                MessageType.DEDUCE_RESPONSE,
+                DocumentMessage.class,
+                DocumentMessage.MessageType.DEDUCE_RESPONSE,
                 message -> {
                     try {
                         sendMessage(queryAgent,
-                                new ResultMessage(MessageType.OPTIMIZE_RESPONSE, getMyId()));
+                                new DocumentMessage(
+                                        DocumentMessage.MessageType.OPTIMIZE_RESPONSE,
+                                        getMyId(),
+                                        new Document()));
 
                     } catch (IOException e) {
                         e.printStackTrace();
