@@ -3,12 +3,11 @@ package edu.agh.io.industryOptimizer.agents.impl;
 import edu.agh.io.industryOptimizer.agents.AbstractAgent;
 import edu.agh.io.industryOptimizer.agents.AgentIdentifier;
 import edu.agh.io.industryOptimizer.agents.AgentType;
-import edu.agh.io.industryOptimizer.messaging.MessageType;
-import edu.agh.io.industryOptimizer.messaging.messages.BatchDataMessage;
-import edu.agh.io.industryOptimizer.messaging.messages.BatchIdMessage;
+import edu.agh.io.industryOptimizer.messaging.messages.DocumentMessage;
 import edu.agh.io.industryOptimizer.messaging.messages.LinkConfigMessage;
 import edu.agh.io.industryOptimizer.messaging.util.CallbacksUtility;
 import edu.agh.io.industryOptimizer.model.batch.BatchIdentifier;
+import org.bson.Document;
 
 import java.io.IOException;
 
@@ -25,19 +24,19 @@ public class ProductBatchAgent extends AbstractAgent {
 
         utility.addCallback(
                 LinkConfigMessage.class,
-                MessageType.LINK_CONFIG,
+                LinkConfigMessage.MessageType.LINK_CONFIG,
                 this::applyLinkConfig
         );
 
         utility.addCallback(
-                BatchIdMessage.class,
-                MessageType.BATCH_LAST,
+                DocumentMessage.class,
+                DocumentMessage.MessageType.BATCH_LAST,
                 message -> {
                     try {
-                        sendMessage(message.getSender(), new BatchIdMessage(
-                                MessageType.BATCH_LAST,
+                        sendMessage(message.getSender(), new DocumentMessage(
+                                DocumentMessage.MessageType.BATCH_LAST,
                                 getMyId(),
-                                batchId
+                                new Document()
                         ));
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -46,14 +45,14 @@ public class ProductBatchAgent extends AbstractAgent {
         );
 
         utility.addCallback(
-                BatchIdMessage.class,
-                MessageType.BATCH_PRODUCED,
+                DocumentMessage.class,
+                DocumentMessage.MessageType.BATCH_PRODUCED,
                 message -> {
                     try {
-                        sendMessage(message.getSender(), new BatchIdMessage(
-                                MessageType.BATCH_PRODUCED,
+                        sendMessage(message.getSender(), new DocumentMessage(
+                                DocumentMessage.MessageType.BATCH_PRODUCED,
                                 getMyId(),
-                                batchId
+                                new Document()
                         ));
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -62,13 +61,14 @@ public class ProductBatchAgent extends AbstractAgent {
         );
 
         utility.addCallback(
-                BatchDataMessage.class,
-                MessageType.BATCH_DATA,
+                DocumentMessage.class,
+                DocumentMessage.MessageType.BATCH_DATA,
                 message -> {
                     try {
-                        sendMessage(persistenceAgent, new BatchDataMessage(
-                                MessageType.BATCH_DATA,
-                                getMyId()
+                        sendMessage(persistenceAgent, new DocumentMessage(
+                                DocumentMessage.MessageType.BATCH_DATA,
+                                getMyId(),
+                                new Document()
                         ));
                     } catch (IOException e) {
                         e.printStackTrace();

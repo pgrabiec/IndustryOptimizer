@@ -1,10 +1,9 @@
 package edu.agh.io.industryOptimizer.agents.impl;
 
 import edu.agh.io.industryOptimizer.agents.AbstractAgent;
-import edu.agh.io.industryOptimizer.messaging.MessageType;
-import edu.agh.io.industryOptimizer.messaging.messages.BatchDataMessage;
-import edu.agh.io.industryOptimizer.messaging.messages.ProcessDataMessage;
+import edu.agh.io.industryOptimizer.messaging.messages.DocumentMessage;
 import edu.agh.io.industryOptimizer.messaging.util.CallbacksUtility;
+import org.bson.Document;
 
 import java.io.IOException;
 
@@ -16,8 +15,8 @@ public class PersistenceAgent extends AbstractAgent {
     protected void setupImpl(CallbacksUtility utility) {
 
         utility.addCallback(
-                BatchDataMessage.class,
-                MessageType.BATCH_DATA,
+                DocumentMessage.class,
+                DocumentMessage.MessageType.BATCH_DATA,
                 message -> {
                     // store data
                     System.out.println("Received batch data.");
@@ -25,8 +24,8 @@ public class PersistenceAgent extends AbstractAgent {
         );
 
         utility.addCallback(
-                ProcessDataMessage.class,
-                MessageType.PROCESS_DATA,
+                DocumentMessage.class,
+                DocumentMessage.MessageType.PROCESS_DATA,
                 message -> {
                     // store data
                     System.out.println("Received process data.");
@@ -34,12 +33,15 @@ public class PersistenceAgent extends AbstractAgent {
         );
 
         utility.addCallback(
-                BatchDataMessage.class,
-                MessageType.BATCH_DATA_REQUEST,
+                DocumentMessage.class,
+                DocumentMessage.MessageType.BATCH_DATA_REQUEST,
                 message -> {
                     try {
                         sendMessage(message.getSender(),
-                                new BatchDataMessage(MessageType.BATCH_DATA_RESPONSE, getMyId()));
+                                new DocumentMessage(
+                                        DocumentMessage.MessageType.BATCH_DATA_RESPONSE,
+                                        getMyId(),
+                                        new Document()));
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -48,12 +50,15 @@ public class PersistenceAgent extends AbstractAgent {
         );
 
         utility.addCallback(
-                ProcessDataMessage.class,
-                MessageType.PROCESS_DATA_REQUEST,
+                DocumentMessage.class,
+                DocumentMessage.MessageType.PROCESS_DATA_REQUEST,
                 message -> {
                     try {
                         sendMessage(message.getSender(),
-                                new ProcessDataMessage(MessageType.PROCESS_DATA_RESPONSE, getMyId()));
+                                new DocumentMessage(
+                                        DocumentMessage.MessageType.PROCESS_DATA_RESPONSE,
+                                        getMyId(),
+                                        new Document()));
 
                     } catch (IOException e) {
                         e.printStackTrace();
