@@ -3,10 +3,8 @@ package edu.agh.io.industryOptimizer.agents.impl;
 import edu.agh.io.industryOptimizer.agents.AbstractAgent;
 import edu.agh.io.industryOptimizer.agents.AgentIdentifier;
 import edu.agh.io.industryOptimizer.agents.AgentType;
-import edu.agh.io.industryOptimizer.messaging.MessageType;
 import edu.agh.io.industryOptimizer.messaging.messages.DocumentMessage;
 import edu.agh.io.industryOptimizer.messaging.messages.LinkConfigMessage;
-import edu.agh.io.industryOptimizer.messaging.messages.ResultMessage;
 import edu.agh.io.industryOptimizer.messaging.util.CallbacksUtility;
 
 /**
@@ -28,7 +26,7 @@ public class QueryHandlingAgent extends AbstractAgent {
                 DocumentMessage.class,
                 DocumentMessage.MessageType.ALGORITHMS,
                 message -> {
-                    // TODO response with algorithms
+                    // TODO present algorithms
                 }
         );
 
@@ -36,23 +34,23 @@ public class QueryHandlingAgent extends AbstractAgent {
                 DocumentMessage.class,
                 DocumentMessage.MessageType.OPTIMIZE_RESPONSE,
                 message -> {
-                    //Show optimization results
+                    // TODO present optimization results
                 }
         );
 
         utility.addCallback(
-                ResultMessage.class,
-                MessageType.ANALYSIS_RESPONSE,
+                DocumentMessage.class,
+                DocumentMessage.MessageType.ANALYSIS_RESPONSE,
                 message -> {
-                    //Show analysis results
+                    // TODO show analysis results
                 }
         );
 
         utility.addCallback(
-                ResultMessage.class,
-                MessageType.DATA_RESPONSE,
+                DocumentMessage.class,
+                DocumentMessage.MessageType.DATA_RESPONSE,
                 message -> {
-                    //Show data
+                    // TODO show data
                 }
         );
 

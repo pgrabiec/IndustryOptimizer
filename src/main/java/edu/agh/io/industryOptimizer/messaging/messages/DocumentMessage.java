@@ -2,7 +2,6 @@ package edu.agh.io.industryOptimizer.messaging.messages;
 
 import edu.agh.io.industryOptimizer.agents.AgentIdentifier;
 import edu.agh.io.industryOptimizer.messaging.AbstractMessage;
-import org.bson.types.ObjectId;
 
 import javax.swing.text.Document;
 
@@ -33,7 +32,6 @@ public class DocumentMessage extends AbstractMessage {
         ALGORITHMS,
         DATA_REQUEST,
         OPTIMIZE_REQUEST,
-        PROCESS_DATA,
         BATCH_DATA,
         PROCESS_STOP,
         BATCH_DATA_RESPONSE,
@@ -43,6 +41,10 @@ public class DocumentMessage extends AbstractMessage {
         BATCH_DATA_REQUEST,
         DATA_RESPONSE,
         PROCESS_DATA_REQUEST,
-        PROCESS_FINISHED
+        PROCESS_FINISHED,
+        PROCESS_DATA_PARAM_CONTROL,
+        PROCESS_DATA_PARAM_OUT,
+        PROCESS_DATA_RES_IN,
+        PROCESS_DATA_RES_OUT
     }
 }

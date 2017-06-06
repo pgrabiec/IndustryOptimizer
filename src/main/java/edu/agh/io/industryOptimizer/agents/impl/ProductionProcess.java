@@ -5,7 +5,6 @@ import edu.agh.io.industryOptimizer.agents.AgentIdentifier;
 import edu.agh.io.industryOptimizer.agents.AgentType;
 import edu.agh.io.industryOptimizer.agents.ProductionProcessState;
 import edu.agh.io.industryOptimizer.messaging.Message;
-import edu.agh.io.industryOptimizer.messaging.MessageType;
 import edu.agh.io.industryOptimizer.messaging.messages.*;
 import edu.agh.io.industryOptimizer.messaging.util.StatefulCallbacksUtility;
 import edu.agh.io.industryOptimizer.model.data.Data;
@@ -20,7 +19,8 @@ public class ProductionProcess extends AbstractStatefulAgent {
     private final Set<AgentIdentifier> allSensors = new HashSet<>();
     private final Set<AgentIdentifier> confirmedSensors = new HashSet<>();
 
-    private final Map<ProductionProcessState, List> dataMap = new HashMap<ProductionProcessState, List>();
+    private final Map<ProductionProcessState, List<Data>> dataMap = new HashMap<>();
+
     private final List<Data> initData = new ArrayList<>();
     private final List<Data> execData = new ArrayList<>();
     private final List<Data> finalData = new ArrayList<>();
