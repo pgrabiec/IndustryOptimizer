@@ -2,8 +2,8 @@ package edu.agh.io.industryOptimizer.messaging.messages;
 
 import edu.agh.io.industryOptimizer.agents.AgentIdentifier;
 import edu.agh.io.industryOptimizer.messaging.AbstractMessage;
+import org.bson.Document;
 
-import javax.swing.text.Document;
 
 public class DocumentMessage extends AbstractMessage {
     private final Document document;

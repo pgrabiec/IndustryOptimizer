@@ -9,6 +9,7 @@ import edu.agh.io.industryOptimizer.messaging.messages.*;
 import edu.agh.io.industryOptimizer.messaging.util.StatefulCallbacksUtility;
 import edu.agh.io.industryOptimizer.model.data.Data;
 import jade.core.behaviours.OneShotBehaviour;
+import org.bson.Document;
 
 import java.io.IOException;
 import java.util.*;
@@ -56,13 +57,14 @@ public class ProductionProcess extends AbstractStatefulAgent {
         dataMap.put(ProductionProcessState.FINALIZING, finalData);
 
 		utility.addCallback(
-            ControlMessage.class,
+            DocumentMessage.class,
             ProductionProcessState.WAITING,
-            MessageType.PROCESS_INIT,
+                DocumentMessage.MessageType.PROCESS_INIT,
             message -> {
-                sendToAllSensors(new ControlMessage(
-                    MessageType.PROCESS_INIT,
-                    getMyId()
+                sendToAllSensors(new DocumentMessage(
+                        DocumentMessage.MessageType.PROCESS_INIT,
+                        getMyId(),
+                        new Document()
                 ));
                 setState(ProductionProcessState.INITIALIZING);
         });
