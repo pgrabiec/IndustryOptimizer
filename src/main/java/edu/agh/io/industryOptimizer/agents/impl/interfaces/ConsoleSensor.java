@@ -1,5 +1,6 @@
 package edu.agh.io.industryOptimizer.agents.impl.interfaces;
 
+import edu.agh.io.industryOptimizer.agents.ProductionProcessState;
 import edu.agh.io.industryOptimizer.agents.impl.AbstractInterfaceAgent;
 import edu.agh.io.industryOptimizer.messaging.messages.DocumentMessage;
 import edu.agh.io.industryOptimizer.messaging.messages.MessageType;
@@ -20,7 +21,7 @@ public class ConsoleSensor extends AbstractInterfaceAgent {
     @Override
     protected void onWaiting() {
         if (!isProcessAgentLinked()) {
-            log.debug("Waiting - No agent");
+            log.debug("Waiting - No process agent");
             return;
         }
 
@@ -40,7 +41,7 @@ public class ConsoleSensor extends AbstractInterfaceAgent {
 
             log.debug("Sent init");
         } catch (IOException e) {
-            e.printStackTrace();
+            setProcessState(ProductionProcessState.WAITING);
         }
     }
 
@@ -62,7 +63,7 @@ public class ConsoleSensor extends AbstractInterfaceAgent {
                     new Document()
             ));
         } catch (IOException e) {
-            e.printStackTrace();
+            setProcessState(ProductionProcessState.WAITING);
         }
     }
 
@@ -84,7 +85,8 @@ public class ConsoleSensor extends AbstractInterfaceAgent {
                         ));
                 log.debug("Param " + i);
             } catch (IOException e) {
-                e.printStackTrace();
+                setProcessState(ProductionProcessState.WAITING);
+                return;
             }
 
             try {
@@ -101,7 +103,7 @@ public class ConsoleSensor extends AbstractInterfaceAgent {
                     new Document()
             ));
         } catch (IOException e) {
-            e.printStackTrace();
+            setProcessState(ProductionProcessState.WAITING);
         }
     }
 
@@ -121,7 +123,8 @@ public class ConsoleSensor extends AbstractInterfaceAgent {
                     )
             ));
         } catch (IOException e) {
-            e.printStackTrace();
+            setProcessState(ProductionProcessState.WAITING);
+            return;
         }
 
         try {
@@ -131,7 +134,7 @@ public class ConsoleSensor extends AbstractInterfaceAgent {
                     new Document())
             );
         } catch (IOException e) {
-            e.printStackTrace();
+            setProcessState(ProductionProcessState.WAITING);
         }
     }
 
@@ -146,12 +149,13 @@ public class ConsoleSensor extends AbstractInterfaceAgent {
                     new Document()
             ));
         } catch (IOException e) {
-            e.printStackTrace();
+            setProcessState(ProductionProcessState.WAITING);
         }
     }
 
     @Override
     protected void onProcessAgentUnlinked() {
+        setProcessState(ProductionProcessState.WAITING);
         log.debug("Production process unlinked");
     }
 }

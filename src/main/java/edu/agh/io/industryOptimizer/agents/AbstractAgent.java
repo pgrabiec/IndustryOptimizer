@@ -98,7 +98,7 @@ public abstract class AbstractAgent extends Agent {
     }
 
     protected final String getMyId() {
-        return getAID().getName();
+        return getAID().getLocalName();
     }
 
     protected void onStart() {

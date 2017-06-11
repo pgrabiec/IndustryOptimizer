@@ -8,10 +8,8 @@ import edu.agh.io.industryOptimizer.messaging.messages.DocumentMessage;
 import edu.agh.io.industryOptimizer.messaging.messages.LinkConfigMessage;
 import edu.agh.io.industryOptimizer.messaging.messages.MessageType;
 import edu.agh.io.industryOptimizer.messaging.messages.util.AgentIdApplier;
-import edu.agh.io.industryOptimizer.messaging.messages.util.ConfigApplierImpl;
 import edu.agh.io.industryOptimizer.messaging.util.StatefulCallbacksUtility;
-import jade.domain.DFService;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -19,6 +17,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 public abstract class AbstractInterfaceAgent extends AbstractStatefulAgent {
+    private static final Logger log = Logger.getLogger(AbstractInterfaceAgent.class.getName());
+
     private final List<LinkConfigMessage> linkConfigMessagesPending = new LinkedList<>();
     private String processAgent;
 
@@ -42,7 +42,6 @@ public abstract class AbstractInterfaceAgent extends AbstractStatefulAgent {
 
         utility.addCallback(
                 LinkConfigMessage.class,
-                ProductionProcessState.WAITING,
                 MessageType.LINK_CONFIG,
                 this::applyLinkConfig
         );
@@ -63,6 +62,10 @@ public abstract class AbstractInterfaceAgent extends AbstractStatefulAgent {
                 message -> {
                     setProcessState(ProductionProcessState.INITIALIZING);
                     onInitializing();
+                    if (getProcessState() == ProductionProcessState.WAITING) {
+                        linkConfigMessagesPending.forEach(this::applyLinkConfig);
+                        linkConfigMessagesPending.clear();
+                    }
                 }
         );
 
@@ -75,6 +78,10 @@ public abstract class AbstractInterfaceAgent extends AbstractStatefulAgent {
                 message -> {
                     setProcessState(ProductionProcessState.EXECUTING);
                     onExecuting();
+                    if (getProcessState() == ProductionProcessState.WAITING) {
+                        linkConfigMessagesPending.forEach(this::applyLinkConfig);
+                        linkConfigMessagesPending.clear();
+                    }
                 }
         );
 
@@ -87,6 +94,10 @@ public abstract class AbstractInterfaceAgent extends AbstractStatefulAgent {
                 message -> {
                     setProcessState(ProductionProcessState.FINALIZING);
                     onFinalizing();
+                    if (getProcessState() == ProductionProcessState.WAITING) {
+                        linkConfigMessagesPending.forEach(this::applyLinkConfig);
+                        linkConfigMessagesPending.clear();
+                    }
                 }
         );
 
@@ -107,6 +118,7 @@ public abstract class AbstractInterfaceAgent extends AbstractStatefulAgent {
 
     private void applyLinkConfig(LinkConfigMessage config) {
         config.getConfiguration().forEach(linkConfigEntry -> {
+            log.debug("LINK CONFIG: " + linkConfigEntry);
             new AgentIdApplier()
                     .callback(AgentType.PROCESS, id -> {
                         this.processAgent = id;
@@ -124,8 +136,7 @@ public abstract class AbstractInterfaceAgent extends AbstractStatefulAgent {
 
     protected final void sendMessageToProcess(Message message) throws IOException {
         if (processAgent == null) {
-            System.out.println("Null process");
-            return;
+            throw new IOException("Null process");
         }
 
         sendMessage(processAgent, message);
