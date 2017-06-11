@@ -2,12 +2,17 @@ package edu.agh.io.industryOptimizer.agents.impl;
 
 import edu.agh.io.industryOptimizer.agents.AbstractStatelessAgent;
 import edu.agh.io.industryOptimizer.agents.AgentType;
+import edu.agh.io.industryOptimizer.messaging.Message;
 import edu.agh.io.industryOptimizer.messaging.messages.DocumentMessage;
 import edu.agh.io.industryOptimizer.messaging.messages.LinkConfigMessage;
 import edu.agh.io.industryOptimizer.messaging.messages.MessageType;
 import edu.agh.io.industryOptimizer.messaging.messages.util.AgentIdApplier;
 import edu.agh.io.industryOptimizer.messaging.util.CallbacksUtility;
 import edu.agh.io.industryOptimizer.model.batch.BatchIdentifier;
+import jade.domain.DFService;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.domain.FIPAException;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
@@ -20,6 +25,7 @@ public abstract class ProductBatchAgent extends AbstractStatelessAgent {
 
     @Override
     protected final void setupCallbacksStateless(CallbacksUtility utility) {
+
         utility.addCallback(
                 LinkConfigMessage.class,
                 MessageType.LINK_CONFIG,
@@ -80,6 +86,14 @@ public abstract class ProductBatchAgent extends AbstractStatelessAgent {
                     }
                 }
         );
+
+        utility.addCallback(
+                DocumentMessage.class,
+                MessageType.BATCH_PROPERTIES,
+                message -> {
+                    handleBatchData(message.getDocument());
+                }
+        );
     }
 
     private void applyLinkConfig(LinkConfigMessage config) {
@@ -115,4 +129,6 @@ public abstract class ProductBatchAgent extends AbstractStatelessAgent {
     protected final AgentType agentType() {
         return AgentType.BATCH;
     }
+
+    protected abstract void handleBatchData(Document data);
 }
