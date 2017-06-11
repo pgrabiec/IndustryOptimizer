@@ -10,5 +10,6 @@ public enum AgentType {
     OPTIMIZATION,
     ANALYSIS,
     REASONING,
-    QUERYING
+    QUERYING,
+    OTHER
 }

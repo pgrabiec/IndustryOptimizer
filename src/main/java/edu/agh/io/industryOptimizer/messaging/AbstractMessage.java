@@ -1,23 +1,31 @@
 package edu.agh.io.industryOptimizer.messaging;
 
-import edu.agh.io.industryOptimizer.agents.AgentIdentifier;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import edu.agh.io.industryOptimizer.messaging.messages.MessageType;
 
 public abstract class AbstractMessage implements Message {
-    private final Object messageType;
-    private final AgentIdentifier sender;
+    @JsonProperty("messageType")
+    private final MessageType messageType;
 
-    public AbstractMessage(Object messageType, AgentIdentifier sender) {
+    @JsonProperty("sender")
+    private final String sender;
+
+    @JsonCreator
+    public AbstractMessage(
+            @JsonProperty("messageType") MessageType messageType,
+            @JsonProperty("sender") String sender) {
         this.messageType = messageType;
         this.sender = sender;
     }
 
     @Override
-    public Object getMessageType() {
+    public MessageType getMessageType() {
         return messageType;
     }
 
     @Override
-    public AgentIdentifier getSender() {
+    public String getSender() {
         return sender;
     }
 }

@@ -1,66 +1,26 @@
 package edu.agh.io.industryOptimizer.messaging.messages;
 
-import edu.agh.io.industryOptimizer.agents.AgentIdentifier;
-import edu.agh.io.industryOptimizer.agents.AgentType;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.agh.io.industryOptimizer.messaging.AbstractMessage;
 
-import java.io.Serializable;
-import java.util.Collection;
+import java.util.*;
 
-public class LinkConfigMessage extends AbstractMessage implements Serializable {
+public class LinkConfigMessage extends AbstractMessage {
+    @JsonProperty("configuration")
     private final Collection<LinkConfigEntry> configuration;
 
+    @JsonCreator
     public LinkConfigMessage(
-            MessageType messageType,
-            Collection<LinkConfigEntry> configuration,
-            AgentIdentifier sender) {
+            @JsonProperty("configuration") Collection<LinkConfigEntry> configuration,
+            @JsonProperty("messageType") MessageType messageType,
+            @JsonProperty("sender") String sender) {
         super(messageType, sender);
         this.configuration = configuration;
     }
 
     public Collection<LinkConfigEntry> getConfiguration() {
         return configuration;
-    }
-
-    public enum OperationType {
-        LINK, UNLINK
-    }
-
-    public static class LinkConfigEntry implements Serializable {
-        private final OperationType operationType;
-        private final AgentType agentType;
-        private final AgentIdentifier agentIdentifier;
-
-        public LinkConfigEntry(OperationType operationType, AgentType agentType, AgentIdentifier agentIdentifier) {
-            this.operationType = operationType;
-            this.agentType = agentType;
-            this.agentIdentifier = agentIdentifier;
-        }
-
-        public OperationType getOperationType() {
-            return operationType;
-        }
-
-        public AgentType getAgentType() {
-            return agentType;
-        }
-
-        public AgentIdentifier getAgentIdentifier() {
-            return agentIdentifier;
-        }
-
-        @Override
-        public String toString() {
-            return "LinkConfigEntry{" +
-                    "operationType=" + operationType +
-                    ", agentType=" + agentType +
-                    ", agentIdentifier=" + agentIdentifier +
-                    '}';
-        }
-    }
-
-    public enum MessageType {
-        LINK_CONFIG
     }
 
     @Override

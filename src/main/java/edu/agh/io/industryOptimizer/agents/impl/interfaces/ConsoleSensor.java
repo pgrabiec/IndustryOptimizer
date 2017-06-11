@@ -2,6 +2,7 @@ package edu.agh.io.industryOptimizer.agents.impl.interfaces;
 
 import edu.agh.io.industryOptimizer.agents.impl.AbstractInterfaceAgent;
 import edu.agh.io.industryOptimizer.messaging.messages.DocumentMessage;
+import edu.agh.io.industryOptimizer.messaging.messages.MessageType;
 import org.apache.log4j.Logger;
 import org.bson.Document;
 
@@ -32,7 +33,7 @@ public class ConsoleSensor extends AbstractInterfaceAgent {
             }
 
             sendMessageToProcess(new DocumentMessage(
-                    DocumentMessage.MessageType.PROCESS_INIT,
+                    MessageType.PROCESS_INIT,
                     getMyId(),
                     new Document()
             ));
@@ -56,7 +57,7 @@ public class ConsoleSensor extends AbstractInterfaceAgent {
 
         try {
             sendMessageToProcess(new DocumentMessage(
-                    DocumentMessage.MessageType.PROCESS_START,
+                    MessageType.PROCESS_START,
                     getMyId(),
                     new Document()
             ));
@@ -68,7 +69,7 @@ public class ConsoleSensor extends AbstractInterfaceAgent {
     @Override
     protected void onExecuting() {
         log.debug("Executing");
-        for (int i=0; i<2; i++) {
+        for (int i = 0; i < 2; i++) {
             try {
                 Document document = new Document();
                 document.put("name", "power" + (System.currentTimeMillis() % 100));
@@ -77,7 +78,7 @@ public class ConsoleSensor extends AbstractInterfaceAgent {
 
                 sendMessageToProcess(
                         new DocumentMessage(
-                                DocumentMessage.MessageType.PROCESS_DATA_PARAM_CONTROL,
+                                MessageType.PROCESS_DATA_PARAM_CONTROL,
                                 getMyId(),
                                 document
                         ));
@@ -95,7 +96,7 @@ public class ConsoleSensor extends AbstractInterfaceAgent {
 
         try {
             sendMessageToProcess(new DocumentMessage(
-                    DocumentMessage.MessageType.PROCESS_STOP,
+                    MessageType.PROCESS_STOP,
                     getMyId(),
                     new Document()
             ));
@@ -109,7 +110,7 @@ public class ConsoleSensor extends AbstractInterfaceAgent {
         log.debug("Finalizing");
         try {
             sendMessageToProcess(new DocumentMessage(
-                    DocumentMessage.MessageType.PROCESS_DATA_PARAM_OUT,
+                    MessageType.PROCESS_DATA_PARAM_OUT,
                     getMyId(),
                     new Document(
                             new HashMap<String, Object>(3) {{
@@ -125,7 +126,7 @@ public class ConsoleSensor extends AbstractInterfaceAgent {
 
         try {
             sendMessageToProcess(new DocumentMessage(
-                    DocumentMessage.MessageType.PROCESS_FORCE_FINALIZE,
+                    MessageType.PROCESS_FORCE_FINALIZE,
                     getMyId(),
                     new Document())
             );
@@ -140,7 +141,7 @@ public class ConsoleSensor extends AbstractInterfaceAgent {
             log.debug("Process linked - sending init");
 
             sendMessageToProcess(new DocumentMessage(
-                    DocumentMessage.MessageType.PROCESS_INIT,
+                    MessageType.PROCESS_INIT,
                     getMyId(),
                     new Document()
             ));

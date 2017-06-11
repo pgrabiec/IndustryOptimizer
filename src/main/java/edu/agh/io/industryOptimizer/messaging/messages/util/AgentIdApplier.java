@@ -1,12 +1,17 @@
 package edu.agh.io.industryOptimizer.messaging.messages.util;
 
-import edu.agh.io.industryOptimizer.agents.AgentIdentifier;
-import edu.agh.io.industryOptimizer.messaging.messages.LinkConfigMessage;
+import edu.agh.io.industryOptimizer.messaging.messages.LinkConfigEntry;
+import edu.agh.io.industryOptimizer.messaging.messages.OperationType;
 
-public class AgentIdApplier extends ConfigApplierImpl<LinkConfigMessage.LinkConfigEntry, AgentIdentifier> {
+public class AgentIdApplier extends ConfigApplierImpl<LinkConfigEntry, String> {
     public AgentIdApplier() {
         super();
-        super.type(LinkConfigMessage.LinkConfigEntry::getAgentType);
-        super.argument(LinkConfigMessage.LinkConfigEntry::getAgentIdentifier);
+        super.type(LinkConfigEntry::getAgentType);
+        super.argument(entry -> {
+            if (entry.getOperationType() == OperationType.LINK) {
+                return entry.getAgent();
+            }
+            return null;
+        });
     }
 }

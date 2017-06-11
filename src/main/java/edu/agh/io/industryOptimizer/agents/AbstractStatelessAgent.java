@@ -12,7 +12,7 @@ public abstract class AbstractStatelessAgent extends AbstractAgent {
     }
 
     @Override
-    protected void executeCallbacks(Message message) {
+    protected final void executeCallbacks(Message message) {
         utility.executeCallbacks(message.getMessageType(), message);
     }
 

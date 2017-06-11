@@ -2,6 +2,7 @@ package edu.agh.io.industryOptimizer.agents.impl;
 
 import edu.agh.io.industryOptimizer.agents.AbstractStatelessAgent;
 import edu.agh.io.industryOptimizer.messaging.messages.DocumentMessage;
+import edu.agh.io.industryOptimizer.messaging.messages.MessageType;
 import edu.agh.io.industryOptimizer.messaging.util.CallbacksUtility;
 import org.bson.Document;
 
@@ -13,7 +14,7 @@ public abstract class PersistenceAgent extends AbstractStatelessAgent {
     protected final void setupCallbacksStateless(CallbacksUtility utility) {
         utility.addCallback(
                 DocumentMessage.class,
-                DocumentMessage.MessageType.BATCH_DATA,
+                MessageType.BATCH_DATA,
                 message -> {
                     storeBatchData(message.getDocument());
 //                    System.out.println("Received batch data.");
@@ -22,7 +23,7 @@ public abstract class PersistenceAgent extends AbstractStatelessAgent {
 
         utility.addCallback(
                 DocumentMessage.class,
-                DocumentMessage.MessageType.PROCESS_DATA,
+                MessageType.PROCESS_DATA,
                 message -> {
                     storeProcessData(message.getDocument());
 //                    System.out.println("Received process data.");
@@ -31,7 +32,7 @@ public abstract class PersistenceAgent extends AbstractStatelessAgent {
 
         utility.addCallback(
                 DocumentMessage.class,
-                DocumentMessage.MessageType.BATCH_DATA_REQUEST,
+                MessageType.BATCH_DATA_REQUEST,
                 message -> {
                     try {
                         Document batchData = retrieveBatchData(message.getDocument());
@@ -42,7 +43,7 @@ public abstract class PersistenceAgent extends AbstractStatelessAgent {
 
                         sendMessage(message.getSender(),
                                 new DocumentMessage(
-                                        DocumentMessage.MessageType.BATCH_DATA_RESPONSE,
+                                        MessageType.BATCH_DATA_RESPONSE,
                                         getMyId(),
                                         batchData));
                     } catch (IOException e) {
@@ -53,7 +54,7 @@ public abstract class PersistenceAgent extends AbstractStatelessAgent {
 
         utility.addCallback(
                 DocumentMessage.class,
-                DocumentMessage.MessageType.PROCESS_DATA_REQUEST,
+                MessageType.PROCESS_DATA_REQUEST,
                 message -> {
                     Document processData = retrieveProcessData(message.getDocument());
 
@@ -64,7 +65,7 @@ public abstract class PersistenceAgent extends AbstractStatelessAgent {
                     try {
                         sendMessage(message.getSender(),
                                 new DocumentMessage(
-                                        DocumentMessage.MessageType.PROCESS_DATA_RESPONSE,
+                                        MessageType.PROCESS_DATA_RESPONSE,
                                         getMyId(),
                                         processData));
 
@@ -82,4 +83,6 @@ public abstract class PersistenceAgent extends AbstractStatelessAgent {
     protected abstract void storeBatchData(Document data);
 
     protected abstract void storeProcessData(Document data);
+
+
 }

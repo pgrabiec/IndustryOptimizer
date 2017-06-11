@@ -1,12 +1,12 @@
 package edu.agh.io.industryOptimizer.messaging.messages.util;
 
-import edu.agh.io.industryOptimizer.messaging.messages.LinkConfigMessage;
+import edu.agh.io.industryOptimizer.messaging.messages.LinkConfigEntry;
 
 public class ConfigEntryApplier
-        extends ConfigApplierImpl<LinkConfigMessage.LinkConfigEntry, LinkConfigMessage.LinkConfigEntry> {
+        extends ConfigApplierImpl<LinkConfigEntry, LinkConfigEntry> {
     public ConfigEntryApplier() {
         super();
-        super.type(LinkConfigMessage.LinkConfigEntry::getAgentType);
+        super.type(LinkConfigEntry::getAgentType);
         super.argument(entry -> entry);
     }
 }

@@ -1,14 +1,13 @@
 package edu.agh.io.industryOptimizer.agents.impl;
 
 import edu.agh.io.industryOptimizer.agents.AbstractStatefulAgent;
-import edu.agh.io.industryOptimizer.agents.AgentIdentifier;
 import edu.agh.io.industryOptimizer.agents.AgentType;
 import edu.agh.io.industryOptimizer.agents.ProductionProcessState;
-import edu.agh.io.industryOptimizer.agents.impl.processes.ProductionProcessAgentImpl;
 import edu.agh.io.industryOptimizer.messaging.Message;
 import edu.agh.io.industryOptimizer.messaging.messages.DocumentMessage;
 import edu.agh.io.industryOptimizer.messaging.messages.LinkConfigMessage;
-import edu.agh.io.industryOptimizer.messaging.messages.util.ConfigApplierImpl;
+import edu.agh.io.industryOptimizer.messaging.messages.MessageType;
+import edu.agh.io.industryOptimizer.messaging.messages.OperationType;
 import edu.agh.io.industryOptimizer.messaging.messages.util.ConfigEntryApplier;
 import edu.agh.io.industryOptimizer.messaging.util.StatefulCallbacksUtility;
 import edu.agh.io.industryOptimizer.model.DefaultIdentifier;
@@ -27,23 +26,21 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import static java.lang.Thread.sleep;
-
 public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
     private static final Logger log = Logger.getLogger(ProductionProcessAgent.class.getName());
 
     private String type;
     private String name;
 
-    private final Set<AgentIdentifier> allInterfaces = new HashSet<>();
-    private final Set<AgentIdentifier> confirmedSensors = new HashSet<>();
+    private final Set<String> allInterfaces = new HashSet<>();
+    private final Set<String> confirmedSensors = new HashSet<>();
 
     private final ArrayList<LinkConfigMessage> configLinksPending = new ArrayList<>();
 
-    private final Set<AgentIdentifier> inputBatchesAgents = new HashSet<>();
-    private final Set<AgentIdentifier> outputBatchesAgents = new HashSet<>();
+    private final Set<String> inputBatchesAgents = new HashSet<>();
+    private final Set<String> outputBatchesAgents = new HashSet<>();
 
-    private AgentIdentifier persistenceAgent = null;
+    private String persistenceAgent = null;
 
     /**
      * Current production process
@@ -76,7 +73,7 @@ public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
         utility.addCallback(
                 DocumentMessage.class,
                 ProductionProcessState.WAITING,
-                DocumentMessage.MessageType.PROCESS_INIT,
+                MessageType.PROCESS_INIT,
                 message -> {
                     setProcessState(ProductionProcessState.INITIALIZING);
                     productionProcess = new ProductionProcessImpl(
@@ -85,7 +82,7 @@ public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
                             type
                     );
                     sendToAllSensors(new DocumentMessage(
-                            DocumentMessage.MessageType.PROCESS_INIT,
+                            MessageType.PROCESS_INIT,
                             getMyId(),
                             new Document()
                     ));
@@ -94,7 +91,7 @@ public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
         utility.addCallback(
                 LinkConfigMessage.class,
                 ProductionProcessState.WAITING,
-                LinkConfigMessage.MessageType.LINK_CONFIG,
+                MessageType.LINK_CONFIG,
                 this::applyLinkConfig);
 
         utility.addCallbackExcept(
@@ -102,7 +99,7 @@ public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
                 Arrays.asList(new ProductionProcessState[]{
                         ProductionProcessState.WAITING
                 }),
-                LinkConfigMessage.MessageType.LINK_CONFIG,
+                MessageType.LINK_CONFIG,
                 configLinksPending::add);
 
         // INITIALIZING
@@ -110,7 +107,7 @@ public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
         utility.addCallback(
                 DocumentMessage.class,
                 ProductionProcessState.INITIALIZING,
-                DocumentMessage.MessageType.PROCESS_READY,
+                MessageType.PROCESS_READY,
                 message -> addInterfaceConfirmation(
                         message.getSender(),
                         () -> {
@@ -118,7 +115,7 @@ public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
                             setProcessState(ProductionProcessState.EXECUTING);
                             sendToAllSensors(
                                     new DocumentMessage(
-                                            DocumentMessage.MessageType.PROCESS_START,
+                                            MessageType.PROCESS_START,
                                             getMyId(),
                                             new Document())
                             );
@@ -128,13 +125,13 @@ public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
         utility.addCallback(
                 DocumentMessage.class,
                 ProductionProcessState.INITIALIZING,
-                DocumentMessage.MessageType.PROCESS_START,
+                MessageType.PROCESS_START,
                 message -> {
                     clearConfirmation();
                     setProcessState(ProductionProcessState.EXECUTING);
                     sendToAllSensors(
                             new DocumentMessage(
-                                    DocumentMessage.MessageType.PROCESS_START,
+                                    MessageType.PROCESS_START,
                                     getMyId(),
                                     new Document())
                     );
@@ -143,7 +140,7 @@ public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
         utility.addCallback(
                 DocumentMessage.class,
                 ProductionProcessState.INITIALIZING,
-                DocumentMessage.MessageType.BATCH_LAST,
+                MessageType.BATCH_LAST,
                 message -> {
                     if (persistenceAgent == null) {
 //                        System.out.println("Received batch id but no persistence present");
@@ -161,7 +158,7 @@ public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
         utility.addCallback(
                 DocumentMessage.class,
                 ProductionProcessState.INITIALIZING,
-                DocumentMessage.MessageType.BATCH_NEW,
+                MessageType.BATCH_NEW,
                 message -> {
                     if (persistenceAgent == null) {
 //                        System.out.println("Received batch id but no persistence present");
@@ -181,7 +178,7 @@ public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
         utility.addCallback(
                 DocumentMessage.class,
                 ProductionProcessState.EXECUTING,
-                DocumentMessage.MessageType.PROCESS_FINISHED,
+                MessageType.PROCESS_FINISHED,
                 message -> addInterfaceConfirmation(
                         message.getSender(),
                         () -> {
@@ -189,7 +186,7 @@ public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
                             setProcessState(ProductionProcessState.FINALIZING);
                             sendToAllSensors(
                                     new DocumentMessage(
-                                            DocumentMessage.MessageType.PROCESS_STOP,
+                                            MessageType.PROCESS_STOP,
                                             getMyId(),
                                             new Document())
                             );
@@ -199,13 +196,13 @@ public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
         utility.addCallback(
                 DocumentMessage.class,
                 ProductionProcessState.EXECUTING,
-                DocumentMessage.MessageType.PROCESS_STOP,
+                MessageType.PROCESS_STOP,
                 message -> {
                     clearConfirmation();
                     setProcessState(ProductionProcessState.FINALIZING);
                     sendToAllSensors(
                             new DocumentMessage(
-                                    DocumentMessage.MessageType.PROCESS_STOP,
+                                    MessageType.PROCESS_STOP,
                                     getMyId(),
                                     new Document())
                     );
@@ -216,7 +213,7 @@ public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
         utility.addCallback(
                 DocumentMessage.class,
                 ProductionProcessState.FINALIZING,
-                DocumentMessage.MessageType.PROCESS_FINALIZE,
+                MessageType.PROCESS_FINALIZE,
                 message -> addInterfaceConfirmation(
                         message.getSender(),
                         () -> {
@@ -225,7 +222,7 @@ public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
                             setProcessState(ProductionProcessState.EXPANDING);
                             sendToAllSensors(
                                     new DocumentMessage(
-                                            DocumentMessage.MessageType.PROCESS_FINALIZE,
+                                            MessageType.PROCESS_FINALIZE,
                                             getMyId(),
                                             new Document())
                             );
@@ -235,13 +232,13 @@ public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
         utility.addCallback(
                 DocumentMessage.class,
                 ProductionProcessState.FINALIZING,
-                DocumentMessage.MessageType.PROCESS_FORCE_FINALIZE,
+                MessageType.PROCESS_FORCE_FINALIZE,
                 message -> {
                     clearConfirmation();
                     setProcessState(ProductionProcessState.EXPANDING);
                     sendToAllSensors(
                             new DocumentMessage(
-                                    DocumentMessage.MessageType.PROCESS_FINALIZE,
+                                    MessageType.PROCESS_FINALIZE,
                                     getMyId(),
                                     new Document())
                     );
@@ -262,7 +259,7 @@ public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
         utility.addCallbackExcept(
                 DocumentMessage.class,
                 Arrays.asList(new Object[]{ProductionProcessState.WAITING}),
-                DocumentMessage.MessageType.PROCESS_DATA_PARAM_CONTROL,
+                MessageType.PROCESS_DATA_PARAM_CONTROL,
                 message -> {
                     if (productionProcess == null) {
                         return;
@@ -274,7 +271,7 @@ public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
         utility.addCallbackExcept(
                 DocumentMessage.class,
                 Arrays.asList(new Object[]{ProductionProcessState.WAITING}),
-                DocumentMessage.MessageType.PROCESS_DATA_PARAM_OUT,
+                MessageType.PROCESS_DATA_PARAM_OUT,
                 message -> {
                     if (productionProcess == null) {
                         return;
@@ -286,7 +283,7 @@ public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
         utility.addCallbackExcept(
                 DocumentMessage.class,
                 Arrays.asList(new Object[]{ProductionProcessState.WAITING}),
-                DocumentMessage.MessageType.PROCESS_DATA_RES_IN,
+                MessageType.PROCESS_DATA_RES_IN,
                 message -> {
                     if (productionProcess == null) {
                         return;
@@ -305,7 +302,7 @@ public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
         utility.addCallbackExcept(
                 DocumentMessage.class,
                 Arrays.asList(new Object[]{ProductionProcessState.WAITING}),
-                DocumentMessage.MessageType.PROCESS_DATA_RES_IN_OTHER,
+                MessageType.PROCESS_DATA_RES_IN_OTHER,
                 message -> {
                     if (productionProcess == null) {
                         return;
@@ -317,7 +314,7 @@ public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
         utility.addCallbackExcept(
                 DocumentMessage.class,
                 Arrays.asList(new Object[]{ProductionProcessState.WAITING}),
-                DocumentMessage.MessageType.PROCESS_DATA_RES_OUT,
+                MessageType.PROCESS_DATA_RES_OUT,
                 message -> {
                     if (productionProcess == null) {
                         return;
@@ -336,7 +333,7 @@ public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
         utility.addCallbackExcept(
                 DocumentMessage.class,
                 Arrays.asList(new Object[]{ProductionProcessState.WAITING}),
-                DocumentMessage.MessageType.PROCESS_DATA_RES_OUT_OTHER,
+                MessageType.PROCESS_DATA_RES_OUT_OTHER,
                 message -> {
                     if (productionProcess == null) {
                         return;
@@ -352,7 +349,7 @@ public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
         addBehaviour((new OneShotBehaviour() {
             @Override
             public void action() {
-                for (AgentIdentifier sensor : allInterfaces) {
+                for (String sensor : allInterfaces) {
                     try {
                         sendMessage(sensor, message);
                     } catch (IOException e) {
@@ -373,7 +370,7 @@ public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
             sendMessage(
                     persistenceAgent,
                     new DocumentMessage(
-                            DocumentMessage.MessageType.PROCESS_DATA,
+                            MessageType.PROCESS_DATA,
                             getMyId(),
                             productionProcess.toDocument()
                     )
@@ -391,44 +388,44 @@ public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
 
                     .callback(AgentType.BATCH_INPUT, entry -> {
 
-                        if (entry.getOperationType() == LinkConfigMessage.OperationType.LINK) {
-                            this.inputBatchesAgents.add(entry.getAgentIdentifier());
-                            onBatchInputLinked(entry.getAgentIdentifier());
+                        if (entry.getOperationType() == OperationType.LINK) {
+                            this.inputBatchesAgents.add(entry.getAgent());
+                            onBatchInputLinked(entry.getAgent());
 
-                        } else if (entry.getOperationType() == LinkConfigMessage.OperationType.UNLINK) {
-                            this.inputBatchesAgents.remove(entry.getAgentIdentifier());
-                            onBatchInputUnlinked(entry.getAgentIdentifier());
+                        } else if (entry.getOperationType() == OperationType.UNLINK) {
+                            this.inputBatchesAgents.remove(entry.getAgent());
+                            onBatchInputUnlinked(entry.getAgent());
                         }
                     })
 
                     .callback(AgentType.BATCH_OUTPUT, entry -> {
-                        if (entry.getOperationType() == LinkConfigMessage.OperationType.LINK) {
-                            this.outputBatchesAgents.add(entry.getAgentIdentifier());
-                            onBatchOutputLinked(entry.getAgentIdentifier());
+                        if (entry.getOperationType() == OperationType.LINK) {
+                            this.outputBatchesAgents.add(entry.getAgent());
+                            onBatchOutputLinked(entry.getAgent());
 
-                        } else if (entry.getOperationType() == LinkConfigMessage.OperationType.UNLINK) {
-                            this.outputBatchesAgents.remove(entry.getAgentIdentifier());
-                            onBatchOutputUnlinked(entry.getAgentIdentifier());
+                        } else if (entry.getOperationType() == OperationType.UNLINK) {
+                            this.outputBatchesAgents.remove(entry.getAgent());
+                            onBatchOutputUnlinked(entry.getAgent());
                         }
                     })
 
                     .callback(AgentType.INTERFACE, entry -> {
-                        if (entry.getOperationType() == LinkConfigMessage.OperationType.LINK) {
-                            this.allInterfaces.add(entry.getAgentIdentifier());
-                            onInterfaceLinked(entry.getAgentIdentifier());
+                        if (entry.getOperationType() == OperationType.LINK) {
+                            this.allInterfaces.add(entry.getAgent());
+                            onInterfaceLinked(entry.getAgent());
 
-                        } else if (entry.getOperationType() == LinkConfigMessage.OperationType.UNLINK) {
-                            this.allInterfaces.remove(entry.getAgentIdentifier());
-                            onInterfaceUnlinked(entry.getAgentIdentifier());
+                        } else if (entry.getOperationType() == OperationType.UNLINK) {
+                            this.allInterfaces.remove(entry.getAgent());
+                            onInterfaceUnlinked(entry.getAgent());
                         }
                     })
 
                     .callback(AgentType.PERSISTENCE, entry -> {
-                        if (entry.getOperationType() == LinkConfigMessage.OperationType.LINK) {
-                            this.persistenceAgent = entry.getAgentIdentifier();
-                            onPersistenceLinked(entry.getAgentIdentifier());
+                        if (entry.getOperationType() == OperationType.LINK) {
+                            this.persistenceAgent = entry.getAgent();
+                            onPersistenceLinked(entry.getAgent());
 
-                        } else if (entry.getOperationType() == LinkConfigMessage.OperationType.UNLINK) {
+                        } else if (entry.getOperationType() == OperationType.UNLINK) {
                             this.persistenceAgent = null;
                             onPersistenceUnlinked();
                         }
@@ -438,7 +435,7 @@ public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
         });
     }
 
-    private void addInterfaceConfirmation(AgentIdentifier interfaceId, Runnable allConfirmedCallback) {
+    private void addInterfaceConfirmation(String interfaceId, Runnable allConfirmedCallback) {
         log.debug("FINALIZE CONFIRMATION: " + interfaceId);
 
         if (!allInterfaces.contains(interfaceId)) {
@@ -463,24 +460,29 @@ public abstract class ProductionProcessAgent extends AbstractStatefulAgent {
     protected void onPersistenceUnlinked() {
     }
 
-    protected void onPersistenceLinked(AgentIdentifier agentIdentifier) {
+    protected void onPersistenceLinked(String String) {
     }
 
-    protected void onInterfaceUnlinked(AgentIdentifier agentIdentifier) {
+    protected void onInterfaceUnlinked(String String) {
     }
 
-    protected void onInterfaceLinked(AgentIdentifier agentIdentifier) {
+    protected void onInterfaceLinked(String String) {
     }
 
-    protected void onBatchOutputUnlinked(AgentIdentifier batch) {
+    protected void onBatchOutputUnlinked(String batch) {
     }
 
-    protected void onBatchOutputLinked(AgentIdentifier batch) {
+    protected void onBatchOutputLinked(String batch) {
     }
 
-    protected void onBatchInputUnlinked(AgentIdentifier batch) {
+    protected void onBatchInputUnlinked(String batch) {
     }
 
-    protected void onBatchInputLinked(AgentIdentifier batch) {
+    protected void onBatchInputLinked(String batch) {
+    }
+
+    @Override
+    protected final AgentType agentType() {
+        return AgentType.PROCESS;
     }
 }

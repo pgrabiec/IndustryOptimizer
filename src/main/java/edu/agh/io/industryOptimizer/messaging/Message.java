@@ -1,10 +1,8 @@
 package edu.agh.io.industryOptimizer.messaging;
 
-import edu.agh.io.industryOptimizer.agents.AgentIdentifier;
+import edu.agh.io.industryOptimizer.messaging.messages.MessageType;
 
-import java.io.Serializable;
-
-public interface Message extends Serializable {
-    public Object getMessageType();
-    public AgentIdentifier getSender();
+public interface Message {
+    public MessageType getMessageType();
+    public String getSender();
 }

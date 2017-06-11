@@ -7,11 +7,8 @@ import org.apache.log4j.BasicConfigurator;
 
 public class Main {
     public static void main(String[] args) {
-//        BasicConfigurator.configure();
-
         String[] arguments = new String[] {
                 "-gui",
-                "Product1:edu.agh.io.industryOptimizer.agents.impl.ProductionProcessImpl"
         };
 
         Boot.main(arguments);

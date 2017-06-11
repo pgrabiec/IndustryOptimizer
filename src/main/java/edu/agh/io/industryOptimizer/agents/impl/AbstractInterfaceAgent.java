@@ -1,15 +1,17 @@
 package edu.agh.io.industryOptimizer.agents.impl;
 
 import edu.agh.io.industryOptimizer.agents.AbstractStatefulAgent;
-import edu.agh.io.industryOptimizer.agents.AgentIdentifier;
 import edu.agh.io.industryOptimizer.agents.AgentType;
 import edu.agh.io.industryOptimizer.agents.ProductionProcessState;
 import edu.agh.io.industryOptimizer.messaging.Message;
 import edu.agh.io.industryOptimizer.messaging.messages.DocumentMessage;
 import edu.agh.io.industryOptimizer.messaging.messages.LinkConfigMessage;
+import edu.agh.io.industryOptimizer.messaging.messages.MessageType;
 import edu.agh.io.industryOptimizer.messaging.messages.util.AgentIdApplier;
 import edu.agh.io.industryOptimizer.messaging.messages.util.ConfigApplierImpl;
 import edu.agh.io.industryOptimizer.messaging.util.StatefulCallbacksUtility;
+import jade.domain.DFService;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -18,14 +20,14 @@ import java.util.List;
 
 public abstract class AbstractInterfaceAgent extends AbstractStatefulAgent {
     private final List<LinkConfigMessage> linkConfigMessagesPending = new LinkedList<>();
-    private AgentIdentifier processAgent;
+    private String processAgent;
 
-    public AbstractInterfaceAgent(ProductionProcessState initialState, AgentIdentifier productionProcessId) {
+    public AbstractInterfaceAgent(ProductionProcessState initialState, String productionProcessId) {
         super(initialState);
         this.processAgent = productionProcessId;
     }
 
-    public AbstractInterfaceAgent(AgentIdentifier productionProcessId) {
+    public AbstractInterfaceAgent(String productionProcessId) {
         super(ProductionProcessState.WAITING);
         this.processAgent = productionProcessId;
     }
@@ -41,7 +43,7 @@ public abstract class AbstractInterfaceAgent extends AbstractStatefulAgent {
         utility.addCallback(
                 LinkConfigMessage.class,
                 ProductionProcessState.WAITING,
-                LinkConfigMessage.MessageType.LINK_CONFIG,
+                MessageType.LINK_CONFIG,
                 this::applyLinkConfig
         );
 
@@ -50,14 +52,14 @@ public abstract class AbstractInterfaceAgent extends AbstractStatefulAgent {
                 Arrays.asList(new ProductionProcessState[]{
                         ProductionProcessState.WAITING
                 }),
-                LinkConfigMessage.MessageType.LINK_CONFIG,
+                MessageType.LINK_CONFIG,
                 linkConfigMessagesPending::add
         );
 
         utility.addCallback(
                 DocumentMessage.class,
                 ProductionProcessState.WAITING,
-                DocumentMessage.MessageType.PROCESS_INIT,
+                MessageType.PROCESS_INIT,
                 message -> {
                     setProcessState(ProductionProcessState.INITIALIZING);
                     onInitializing();
@@ -69,7 +71,7 @@ public abstract class AbstractInterfaceAgent extends AbstractStatefulAgent {
         utility.addCallback(
                 DocumentMessage.class,
                 ProductionProcessState.INITIALIZING,
-                DocumentMessage.MessageType.PROCESS_START,
+                MessageType.PROCESS_START,
                 message -> {
                     setProcessState(ProductionProcessState.EXECUTING);
                     onExecuting();
@@ -81,7 +83,7 @@ public abstract class AbstractInterfaceAgent extends AbstractStatefulAgent {
         utility.addCallback(
                 DocumentMessage.class,
                 ProductionProcessState.EXECUTING,
-                DocumentMessage.MessageType.PROCESS_STOP,
+                MessageType.PROCESS_STOP,
                 message -> {
                     setProcessState(ProductionProcessState.FINALIZING);
                     onFinalizing();
@@ -93,7 +95,7 @@ public abstract class AbstractInterfaceAgent extends AbstractStatefulAgent {
         utility.addCallback(
                 DocumentMessage.class,
                 ProductionProcessState.FINALIZING,
-                DocumentMessage.MessageType.PROCESS_FINALIZE,
+                MessageType.PROCESS_FINALIZE,
                 message -> {
                     setProcessState(ProductionProcessState.WAITING);
                     linkConfigMessagesPending.forEach(this::applyLinkConfig);
@@ -108,6 +110,7 @@ public abstract class AbstractInterfaceAgent extends AbstractStatefulAgent {
             new AgentIdApplier()
                     .callback(AgentType.PROCESS, id -> {
                         this.processAgent = id;
+
                         if (id != null) {
                             onProcessAgentLinked();
                         } else {
@@ -132,7 +135,7 @@ public abstract class AbstractInterfaceAgent extends AbstractStatefulAgent {
         return processAgent != null;
     }
 
-    protected final AgentIdentifier getProcessAgent() {
+    protected final String getProcessAgent() {
         return processAgent;
     }
 
@@ -148,5 +151,9 @@ public abstract class AbstractInterfaceAgent extends AbstractStatefulAgent {
     }
 
     protected void onProcessAgentUnlinked() {
+    }
+    @Override
+    protected final AgentType agentType() {
+        return AgentType.INTERFACE;
     }
 }

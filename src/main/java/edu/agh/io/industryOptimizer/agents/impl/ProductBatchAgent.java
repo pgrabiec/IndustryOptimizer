@@ -1,10 +1,10 @@
 package edu.agh.io.industryOptimizer.agents.impl;
 
 import edu.agh.io.industryOptimizer.agents.AbstractStatelessAgent;
-import edu.agh.io.industryOptimizer.agents.AgentIdentifier;
 import edu.agh.io.industryOptimizer.agents.AgentType;
 import edu.agh.io.industryOptimizer.messaging.messages.DocumentMessage;
 import edu.agh.io.industryOptimizer.messaging.messages.LinkConfigMessage;
+import edu.agh.io.industryOptimizer.messaging.messages.MessageType;
 import edu.agh.io.industryOptimizer.messaging.messages.util.AgentIdApplier;
 import edu.agh.io.industryOptimizer.messaging.util.CallbacksUtility;
 import edu.agh.io.industryOptimizer.model.batch.BatchIdentifier;
@@ -15,20 +15,20 @@ import java.io.IOException;
 
 
 public abstract class ProductBatchAgent extends AbstractStatelessAgent {
-    private AgentIdentifier persistenceAgent;
+    private String persistenceAgent;
     private BatchIdentifier batchId;
 
     @Override
     protected final void setupCallbacksStateless(CallbacksUtility utility) {
         utility.addCallback(
                 LinkConfigMessage.class,
-                LinkConfigMessage.MessageType.LINK_CONFIG,
+                MessageType.LINK_CONFIG,
                 this::applyLinkConfig
         );
 
         utility.addCallback(
                 DocumentMessage.class,
-                DocumentMessage.MessageType.BATCH_LAST,
+                MessageType.BATCH_LAST,
                 message -> {
                     try {
                         Document document = new Document();
@@ -38,7 +38,7 @@ public abstract class ProductBatchAgent extends AbstractStatelessAgent {
                         }
 
                         sendMessage(message.getSender(), new DocumentMessage(
-                                DocumentMessage.MessageType.BATCH_LAST,
+                                MessageType.BATCH_LAST,
                                 getMyId(),
                                 document));
                     } catch (IOException e) {
@@ -49,7 +49,7 @@ public abstract class ProductBatchAgent extends AbstractStatelessAgent {
 
         utility.addCallback(
                 DocumentMessage.class,
-                DocumentMessage.MessageType.BATCH_PRODUCED,
+                MessageType.BATCH_PRODUCED,
                 message -> {
                     try {
                         String batchId = message.getDocument().getString("id");
@@ -66,11 +66,11 @@ public abstract class ProductBatchAgent extends AbstractStatelessAgent {
 
         utility.addCallback(
                 DocumentMessage.class,
-                DocumentMessage.MessageType.BATCH_DATA,
+                MessageType.BATCH_DATA,
                 message -> {
                     try {
                         sendMessage(persistenceAgent, new DocumentMessage(
-                                DocumentMessage.MessageType.BATCH_DATA,
+                                MessageType.BATCH_DATA,
                                 getMyId(),
                                 message.getDocument()));
 
@@ -109,5 +109,10 @@ public abstract class ProductBatchAgent extends AbstractStatelessAgent {
     }
 
     protected void onBatchDataReceived(Document data) {
+    }
+
+    @Override
+    protected final AgentType agentType() {
+        return AgentType.BATCH;
     }
 }
