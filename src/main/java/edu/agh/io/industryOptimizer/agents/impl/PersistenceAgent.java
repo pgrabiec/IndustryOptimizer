@@ -1,25 +1,22 @@
 package edu.agh.io.industryOptimizer.agents.impl;
 
-import edu.agh.io.industryOptimizer.agents.AbstractAgent;
+import edu.agh.io.industryOptimizer.agents.AbstractStatelessAgent;
 import edu.agh.io.industryOptimizer.messaging.messages.DocumentMessage;
 import edu.agh.io.industryOptimizer.messaging.util.CallbacksUtility;
 import org.bson.Document;
 
 import java.io.IOException;
 
-/**
- * Created by Tomasz on 02.06.2017.
- */
-public class PersistenceAgent extends AbstractAgent {
-    @Override
-    protected void setupImpl(CallbacksUtility utility) {
+public abstract class PersistenceAgent extends AbstractStatelessAgent {
 
+    @Override
+    protected final void setupCallbacksStateless(CallbacksUtility utility) {
         utility.addCallback(
                 DocumentMessage.class,
                 DocumentMessage.MessageType.BATCH_DATA,
                 message -> {
-                    // store data
-                    System.out.println("Received batch data.");
+                    storeBatchData(message.getDocument());
+//                    System.out.println("Received batch data.");
                 }
         );
 
@@ -27,8 +24,8 @@ public class PersistenceAgent extends AbstractAgent {
                 DocumentMessage.class,
                 DocumentMessage.MessageType.PROCESS_DATA,
                 message -> {
-                    // store data
-                    System.out.println("Received process data.");
+                    storeProcessData(message.getDocument());
+//                    System.out.println("Received process data.");
                 }
         );
 
@@ -37,12 +34,17 @@ public class PersistenceAgent extends AbstractAgent {
                 DocumentMessage.MessageType.BATCH_DATA_REQUEST,
                 message -> {
                     try {
+                        Document batchData = retrieveBatchData(message.getDocument());
+
+                        if (batchData == null) {
+                            batchData = new Document();
+                        }
+
                         sendMessage(message.getSender(),
                                 new DocumentMessage(
                                         DocumentMessage.MessageType.BATCH_DATA_RESPONSE,
                                         getMyId(),
-                                        new Document()));
-
+                                        batchData));
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -53,12 +55,18 @@ public class PersistenceAgent extends AbstractAgent {
                 DocumentMessage.class,
                 DocumentMessage.MessageType.PROCESS_DATA_REQUEST,
                 message -> {
+                    Document processData = retrieveProcessData(message.getDocument());
+
+                    if (processData == null) {
+                        processData = new Document();
+                    }
+
                     try {
                         sendMessage(message.getSender(),
                                 new DocumentMessage(
                                         DocumentMessage.MessageType.PROCESS_DATA_RESPONSE,
                                         getMyId(),
-                                        new Document()));
+                                        processData));
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -66,4 +74,12 @@ public class PersistenceAgent extends AbstractAgent {
                 }
         );
     }
+
+    protected abstract Document retrieveBatchData(Document request);
+
+    protected abstract Document retrieveProcessData(Document request);
+
+    protected abstract void storeBatchData(Document data);
+
+    protected abstract void storeProcessData(Document data);
 }

@@ -1,56 +1,45 @@
 package edu.agh.io.industryOptimizer.agents;
 
+import com.sun.istack.internal.NotNull;
 import edu.agh.io.industryOptimizer.messaging.Message;
-import edu.agh.io.industryOptimizer.messaging.util.CallbacksUtility;
 import edu.agh.io.industryOptimizer.messaging.util.StatefulCallbacksUtility;
-import edu.agh.io.industryOptimizer.messaging.util.StatefulCallbacksUtilityImpl;
-import jade.core.behaviours.CyclicBehaviour;
-import jade.lang.acl.ACLMessage;
-import jade.lang.acl.UnreadableException;
+import edu.agh.io.industryOptimizer.messaging.util.SynchronizedStatefulCallbacksUtility;
 
 public abstract class AbstractStatefulAgent extends AbstractAgent {
-    private final StatefulCallbacksUtility utility = new StatefulCallbacksUtilityImpl();
+    private final StatefulCallbacksUtility utility = new SynchronizedStatefulCallbacksUtility();
     private ProductionProcessState state = ProductionProcessState.WAITING;
 
-    protected void setup() {
-        setupImpl(utility);
+    public AbstractStatefulAgent(ProductionProcessState initialState) {
+        this.state = initialState;
+    }
 
-        addBehaviour(new CyclicBehaviour() {
-            @Override
-            public void action() {
-                ACLMessage mesg = getAgent().receive();
-                if (mesg != null) {
-                    try {
-                        Message message = (Message) mesg.getContentObject();
-                        utility.executeCallbacks(state, message.getMessageType(), message);
-                    } catch (UnreadableException e) {
-                        e.printStackTrace();
-                    } catch (ClassCastException e) {
-                        System.err.println("Received unknown message");
-                    }
-                }
-            }
-        });
+    public AbstractStatefulAgent() {
+    }
+
+    protected final void setProcessState(ProductionProcessState state) {
+        this.state = state;
+    }
+
+    protected final ProductionProcessState getProcessState() {
+        return state;
+    }
+
+    protected final StatefulCallbacksUtility getUtility() {
+        return utility;
+    }
+
+    @Override
+    protected final void executeCallbacks(Message message) {
+        utility.executeCallbacks(state, message.getMessageType(), message);
+    }
+
+    @Override
+    protected final void setupCallbacks() {
+        setupCallbacksStateful(utility);
     }
 
     /**
      * For initializing the CallbacksUtility
      * */
-    protected abstract void setupImpl(StatefulCallbacksUtility utility);
-
-    protected void setState(ProductionProcessState state) {
-        this.state = state;
-    }
-
-    protected ProductionProcessState getProcessState() {
-        return state;
-    }
-
-    @Override
-    protected void setupImpl(CallbacksUtility utility) {
-        setupImpl(this.utility);
-    }
-
-    @Override
-    protected void started() {}
+    protected abstract void setupCallbacksStateful(@NotNull StatefulCallbacksUtility utility);
 }

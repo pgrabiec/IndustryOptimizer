@@ -1,8 +1,6 @@
 package edu.agh.io.industryOptimizer.agents;
 
 import edu.agh.io.industryOptimizer.messaging.Message;
-import edu.agh.io.industryOptimizer.messaging.util.CallbacksUtility;
-import edu.agh.io.industryOptimizer.messaging.util.CallbacksUtilityImpl;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
@@ -13,10 +11,9 @@ import jade.lang.acl.UnreadableException;
 import java.io.IOException;
 
 public abstract class AbstractAgent extends Agent {
-    private final CallbacksUtility utility = new CallbacksUtilityImpl();
 
-    protected void setup() {
-        setupImpl(utility);
+    protected final void setup() {
+        setupCallbacks();
 
         addBehaviour(new CyclicBehaviour() {
             @Override
@@ -28,7 +25,7 @@ public abstract class AbstractAgent extends Agent {
                         addBehaviour(new OneShotBehaviour() {
                             @Override
                             public void action() {
-                                utility.executeCallbacks(message.getMessageType(), message);
+                                executeCallbacks(message);
                             }
                         });
                     } catch (UnreadableException e) {
@@ -43,13 +40,15 @@ public abstract class AbstractAgent extends Agent {
         addBehaviour(new OneShotBehaviour() {
             @Override
             public void action() {
-                System.out.println("starting");
-                started();
+                AbstractAgent.this.onStart();
             }
         });
     }
 
     protected void sendMessage(AgentIdentifier receiver, Message message) throws IOException {
+        assert receiver != null;
+        assert message != null;
+
         ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
         msg.addReceiver(new AID(receiver.id(), AID.ISLOCALNAME));
         msg.setLanguage("English");
@@ -66,10 +65,9 @@ public abstract class AbstractAgent extends Agent {
         return new AgentIdentifierImpl(getAID().getName());
     }
 
-    /**
-     * For initializing the CallbacksUtility
-     * */
-    protected abstract void setupImpl(CallbacksUtility utility);
+    protected abstract void executeCallbacks(Message message);
 
-    protected void started() {}
+    protected abstract void setupCallbacks();
+
+    protected void onStart() {}
 }

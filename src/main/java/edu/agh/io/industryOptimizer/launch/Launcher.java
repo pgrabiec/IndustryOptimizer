@@ -28,7 +28,7 @@ public class Launcher {
 
         launchAgent(
                 "process1",
-                "edu.agh.io.industryOptimizer.agents.impl.ProductionProcessAgent",
+                "edu.agh.io.industryOptimizer.agents.impl.processes.ProductionProcessAgentImpl",
                 new Object[] {
                         "process_type_1",
                         "process1"
@@ -101,6 +101,8 @@ public class Launcher {
                 e.printStackTrace();
             }
             send(msg2);
+
+            doDelete();
         }
     }
 }

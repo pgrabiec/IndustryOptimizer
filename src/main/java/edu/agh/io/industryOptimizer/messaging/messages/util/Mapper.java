@@ -1,4 +1,6 @@
 package edu.agh.io.industryOptimizer.messaging.messages.util;
 
-public interface Mapper {
+@FunctionalInterface
+public interface Mapper<K, V> {
+    public V map(K key);
 }

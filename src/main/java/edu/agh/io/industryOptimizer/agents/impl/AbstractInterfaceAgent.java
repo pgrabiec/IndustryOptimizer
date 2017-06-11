@@ -7,22 +7,31 @@ import edu.agh.io.industryOptimizer.agents.ProductionProcessState;
 import edu.agh.io.industryOptimizer.messaging.Message;
 import edu.agh.io.industryOptimizer.messaging.messages.DocumentMessage;
 import edu.agh.io.industryOptimizer.messaging.messages.LinkConfigMessage;
-import edu.agh.io.industryOptimizer.messaging.util.CallbacksUtility;
+import edu.agh.io.industryOptimizer.messaging.messages.util.AgentIdApplier;
+import edu.agh.io.industryOptimizer.messaging.messages.util.ConfigApplierImpl;
 import edu.agh.io.industryOptimizer.messaging.util.StatefulCallbacksUtility;
-import org.bson.Document;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-public abstract class InterfaceAgent extends AbstractStatefulAgent {
-    private AgentIdentifier productionProcessId;
-
+public abstract class AbstractInterfaceAgent extends AbstractStatefulAgent {
     private final List<LinkConfigMessage> linkConfigMessagesPending = new LinkedList<>();
+    private AgentIdentifier processAgent;
 
-    protected InterfaceAgent(CallbacksUtility utility) {
-        super(utility);
+    public AbstractInterfaceAgent(ProductionProcessState initialState, AgentIdentifier productionProcessId) {
+        super(initialState);
+        this.processAgent = productionProcessId;
+    }
+
+    public AbstractInterfaceAgent(AgentIdentifier productionProcessId) {
+        super(ProductionProcessState.WAITING);
+        this.processAgent = productionProcessId;
+    }
+
+    public AbstractInterfaceAgent() {
+        super(ProductionProcessState.WAITING);
     }
 
     @Override
@@ -33,14 +42,12 @@ public abstract class InterfaceAgent extends AbstractStatefulAgent {
                 LinkConfigMessage.class,
                 ProductionProcessState.WAITING,
                 LinkConfigMessage.MessageType.LINK_CONFIG,
-                message -> {
-                    applyLinkConfig(message);
-                }
+                this::applyLinkConfig
         );
 
         utility.addCallbackExcept(
                 LinkConfigMessage.class,
-                Arrays.asList(new ProductionProcessState[] {
+                Arrays.asList(new ProductionProcessState[]{
                         ProductionProcessState.WAITING
                 }),
                 LinkConfigMessage.MessageType.LINK_CONFIG,
@@ -52,8 +59,8 @@ public abstract class InterfaceAgent extends AbstractStatefulAgent {
                 ProductionProcessState.WAITING,
                 DocumentMessage.MessageType.PROCESS_INIT,
                 message -> {
-                    setState(ProductionProcessState.INITIALIZING);
-                    initialize();
+                    setProcessState(ProductionProcessState.INITIALIZING);
+                    onInitializing();
                 }
         );
 
@@ -64,8 +71,8 @@ public abstract class InterfaceAgent extends AbstractStatefulAgent {
                 ProductionProcessState.INITIALIZING,
                 DocumentMessage.MessageType.PROCESS_START,
                 message -> {
-                    setState(ProductionProcessState.EXECUTING);
-                    execute();
+                    setProcessState(ProductionProcessState.EXECUTING);
+                    onExecuting();
                 }
         );
 
@@ -76,8 +83,8 @@ public abstract class InterfaceAgent extends AbstractStatefulAgent {
                 ProductionProcessState.EXECUTING,
                 DocumentMessage.MessageType.PROCESS_STOP,
                 message -> {
-                    setState(ProductionProcessState.FINALIZING);
-                    finalizing();
+                    setProcessState(ProductionProcessState.FINALIZING);
+                    onFinalizing();
                 }
         );
 
@@ -88,59 +95,58 @@ public abstract class InterfaceAgent extends AbstractStatefulAgent {
                 ProductionProcessState.FINALIZING,
                 DocumentMessage.MessageType.PROCESS_FINALIZE,
                 message -> {
-                    setState(ProductionProcessState.WAITING);
+                    setProcessState(ProductionProcessState.WAITING);
                     linkConfigMessagesPending.forEach(this::applyLinkConfig);
                     linkConfigMessagesPending.clear();
-                    waiting();
+                    onWaiting();
                 }
         );
-
-        preSetup();
-
-        setState(ProductionProcessState.WAITING);
-
-        started();
     }
 
     private void applyLinkConfig(LinkConfigMessage config) {
-        System.out.println("Applying link config " + config);
         config.getConfiguration().forEach(linkConfigEntry -> {
-            if (!linkConfigEntry.getAgentType()
-                    .equals(AgentType.PROCESS)) {
-                return;
-            }
+            new AgentIdApplier()
+                    .callback(AgentType.PROCESS, id -> {
+                        this.processAgent = id;
+                        if (id != null) {
+                            onProcessAgentLinked();
+                        } else {
+                            onProcessAgentUnlinked();
+                        }
+                    })
 
-            switch (linkConfigEntry.getOperationType()) {
-                case LINK:
-                    this.productionProcessId = linkConfigEntry.getAgentIdentifier();
-                    System.out.println("Assigned process " + productionProcessId);
-                    break;
-                case UNLINK:
-                    this.productionProcessId = null;
-                    break;
-            }
-
-            linkChanged();
+                    .execute(linkConfigEntry);
         });
     }
 
-    protected void sendMessageToProcess(Message message) throws IOException {
-        if (productionProcessId == null) {
+    protected final void sendMessageToProcess(Message message) throws IOException {
+        if (processAgent == null) {
             System.out.println("Null process");
             return;
         }
 
-        sendMessage(productionProcessId, message);
+        sendMessage(processAgent, message);
     }
 
-    protected boolean hasProcessId() {
-        return productionProcessId != null;
+    protected final boolean isProcessAgentLinked() {
+        return processAgent != null;
     }
 
-    protected abstract void preSetup();
-    protected abstract void waiting();
-    protected abstract void initialize();
-    protected abstract void execute();
-    protected abstract void finalizing();
-    protected abstract void linkChanged();
+    protected final AgentIdentifier getProcessAgent() {
+        return processAgent;
+    }
+
+    protected abstract void onWaiting();
+
+    protected abstract void onInitializing();
+
+    protected abstract void onExecuting();
+
+    protected abstract void onFinalizing();
+
+    protected void onProcessAgentLinked() {
+    }
+
+    protected void onProcessAgentUnlinked() {
+    }
 }

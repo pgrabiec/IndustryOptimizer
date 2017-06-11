@@ -1,21 +1,19 @@
 package edu.agh.io.industryOptimizer.agents.impl;
 
-import edu.agh.io.industryOptimizer.agents.AbstractAgent;
+import edu.agh.io.industryOptimizer.agents.AbstractStatelessAgent;
 import edu.agh.io.industryOptimizer.agents.AgentIdentifier;
 import edu.agh.io.industryOptimizer.agents.AgentType;
 import edu.agh.io.industryOptimizer.messaging.messages.DocumentMessage;
 import edu.agh.io.industryOptimizer.messaging.messages.LinkConfigMessage;
+import edu.agh.io.industryOptimizer.messaging.messages.util.AgentIdApplier;
 import edu.agh.io.industryOptimizer.messaging.util.CallbacksUtility;
+import org.bson.Document;
 
-/**
- * Created by Tomasz on 02.06.2017.
- */
-public class QueryHandlingAgent extends AbstractAgent {
+public abstract class QueryHandlingAgent extends AbstractStatelessAgent {
     private AgentIdentifier optimizationAgent;
 
     @Override
-    protected void setupImpl(CallbacksUtility utility) {
-
+    protected final void setupCallbacksStateless(CallbacksUtility utility) {
         utility.addCallback(
                 LinkConfigMessage.class,
                 LinkConfigMessage.MessageType.LINK_CONFIG,
@@ -25,16 +23,14 @@ public class QueryHandlingAgent extends AbstractAgent {
         utility.addCallback(
                 DocumentMessage.class,
                 DocumentMessage.MessageType.ALGORITHMS,
-                message -> {
-                    // TODO present algorithms
-                }
+                message -> onAlgorithmsResponse(message.getDocument())
         );
 
         utility.addCallback(
                 DocumentMessage.class,
                 DocumentMessage.MessageType.OPTIMIZE_RESPONSE,
                 message -> {
-                    // TODO present optimization results
+                    onOptimiseResponse(message.getDocument());
                 }
         );
 
@@ -42,7 +38,7 @@ public class QueryHandlingAgent extends AbstractAgent {
                 DocumentMessage.class,
                 DocumentMessage.MessageType.ANALYSIS_RESPONSE,
                 message -> {
-                    // TODO show analysis results
+                    onAnalysisResponse(message.getDocument());
                 }
         );
 
@@ -50,26 +46,38 @@ public class QueryHandlingAgent extends AbstractAgent {
                 DocumentMessage.class,
                 DocumentMessage.MessageType.DATA_RESPONSE,
                 message -> {
-                    // TODO show data
+                    onDataResponse(message.getDocument());
                 }
         );
-
     }
 
     private void applyLinkConfig(LinkConfigMessage config) {
         config.getConfiguration().forEach(linkConfigEntry -> {
 
-            if (linkConfigEntry.getAgentType()
-                    .equals(AgentType.OPTIMIZATION)) {
-                switch (linkConfigEntry.getOperationType()) {
-                    case LINK:
-                        optimizationAgent = linkConfigEntry.getAgentIdentifier();
-                        break;
-                    case UNLINK:
-                        optimizationAgent = null;
-                        break;
-                }
-            }
+            new AgentIdApplier()
+                    .callback(AgentType.OPTIMIZATION, id -> {
+                        if (id != null) {
+                            optimizationAgent = id;
+                            onOptimizationLinked(id);
+                        } else {
+                            optimizationAgent = null;
+                            onOptimizationUnlinked();
+                        }
+                    })
+                    .execute(linkConfigEntry);
+
         });
     }
+
+    protected void onOptimizationUnlinked() {}
+
+    protected void onOptimizationLinked(AgentIdentifier id) {}
+
+    protected void onDataResponse(Document dataResponse) {}
+
+    protected void onAnalysisResponse(Document analysisResponse) {}
+
+    protected void onOptimiseResponse(Document optimiseResponse) {}
+
+    protected void onAlgorithmsResponse(Document algorithmsResponse) {}
 }

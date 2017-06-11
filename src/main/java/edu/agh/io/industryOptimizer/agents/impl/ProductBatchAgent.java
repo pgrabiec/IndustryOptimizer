@@ -1,27 +1,25 @@
 package edu.agh.io.industryOptimizer.agents.impl;
 
-import edu.agh.io.industryOptimizer.agents.AbstractAgent;
+import edu.agh.io.industryOptimizer.agents.AbstractStatelessAgent;
 import edu.agh.io.industryOptimizer.agents.AgentIdentifier;
 import edu.agh.io.industryOptimizer.agents.AgentType;
 import edu.agh.io.industryOptimizer.messaging.messages.DocumentMessage;
 import edu.agh.io.industryOptimizer.messaging.messages.LinkConfigMessage;
+import edu.agh.io.industryOptimizer.messaging.messages.util.AgentIdApplier;
 import edu.agh.io.industryOptimizer.messaging.util.CallbacksUtility;
 import edu.agh.io.industryOptimizer.model.batch.BatchIdentifier;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
 import java.io.IOException;
 
-/**
- * Created by Tomasz on 02.06.2017.
- */
-public class ProductBatchAgent extends AbstractAgent {
-    private AgentIdentifier persistenceId;
+
+public abstract class ProductBatchAgent extends AbstractStatelessAgent {
     private AgentIdentifier persistenceAgent;
     private BatchIdentifier batchId;
 
     @Override
-    protected void setupImpl(CallbacksUtility utility) {
-
+    protected final void setupCallbacksStateless(CallbacksUtility utility) {
         utility.addCallback(
                 LinkConfigMessage.class,
                 LinkConfigMessage.MessageType.LINK_CONFIG,
@@ -33,11 +31,16 @@ public class ProductBatchAgent extends AbstractAgent {
                 DocumentMessage.MessageType.BATCH_LAST,
                 message -> {
                     try {
+                        Document document = new Document();
+
+                        if (batchId != null) {
+                            document.put("id", batchId.id().toString());
+                        }
+
                         sendMessage(message.getSender(), new DocumentMessage(
                                 DocumentMessage.MessageType.BATCH_LAST,
                                 getMyId(),
-                                new Document()
-                        ));
+                                document));
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -49,13 +52,14 @@ public class ProductBatchAgent extends AbstractAgent {
                 DocumentMessage.MessageType.BATCH_PRODUCED,
                 message -> {
                     try {
-                        sendMessage(message.getSender(), new DocumentMessage(
-                                DocumentMessage.MessageType.BATCH_PRODUCED,
-                                getMyId(),
-                                new Document()
-                        ));
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        String batchId = message.getDocument().getString("id");
+
+                        if (batchId != null) {
+                            this.batchId = new BatchIdentifier(new ObjectId(batchId));
+                            onBatchProduced(this.batchId);
+                        }
+                    } catch (ClassCastException e) {
+                        return; // no id tag
                     }
                 }
         );
@@ -68,8 +72,9 @@ public class ProductBatchAgent extends AbstractAgent {
                         sendMessage(persistenceAgent, new DocumentMessage(
                                 DocumentMessage.MessageType.BATCH_DATA,
                                 getMyId(),
-                                new Document()
-                        ));
+                                message.getDocument()));
+
+                        onBatchDataReceived(message.getDocument());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -79,19 +84,30 @@ public class ProductBatchAgent extends AbstractAgent {
 
     private void applyLinkConfig(LinkConfigMessage config) {
         config.getConfiguration().forEach(linkConfigEntry -> {
-            if (!linkConfigEntry.getAgentType()
-                    .equals(AgentType.PERSISTENCE)) {
-                return;
-            }
+            new AgentIdApplier()
 
-            switch (linkConfigEntry.getOperationType()) {
-                case LINK:
-                    this.persistenceId = linkConfigEntry.getAgentIdentifier();
-                    break;
-                case UNLINK:
-                    this.persistenceId = null;
-                    break;
-            }
+                    .callback(AgentType.PERSISTENCE, id -> {
+                        this.persistenceAgent = id;
+                        if (id != null) {
+                            onPersistenceLinked();
+                        } else {
+                            onPersistenceUnlinked();
+                        }
+                    })
+
+                    .execute(linkConfigEntry);
         });
+    }
+
+    protected void onPersistenceLinked() {
+    }
+
+    protected void onPersistenceUnlinked() {
+    }
+
+    protected void onBatchProduced(BatchIdentifier batch) {
+    }
+
+    protected void onBatchDataReceived(Document data) {
     }
 }

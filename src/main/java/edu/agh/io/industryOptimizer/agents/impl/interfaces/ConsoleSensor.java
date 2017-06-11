@@ -1,36 +1,62 @@
 package edu.agh.io.industryOptimizer.agents.impl.interfaces;
 
-import edu.agh.io.industryOptimizer.agents.impl.InterfaceAgent;
+import edu.agh.io.industryOptimizer.agents.impl.AbstractInterfaceAgent;
 import edu.agh.io.industryOptimizer.messaging.messages.DocumentMessage;
-import jade.core.behaviours.OneShotBehaviour;
+import org.apache.log4j.Logger;
 import org.bson.Document;
 
 import java.io.IOException;
 import java.util.HashMap;
 
-public class ConsoleSensor extends InterfaceAgent {
+public class ConsoleSensor extends AbstractInterfaceAgent {
+    private static final Logger log = Logger.getLogger(ConsoleSensor.class.getName());
+
     @Override
-    protected void preSetup() {
-        System.out.println("pre setup");
+    protected void onStart() {
+        log.debug("Pre setup");
     }
 
     @Override
-    protected void waiting() {
-        System.out.println("Waiting");
-    }
+    protected void onWaiting() {
+        if (!isProcessAgentLinked()) {
+            log.debug("Waiting - No agent");
+            return;
+        }
 
-    @Override
-    protected void initialize() {
-        System.out.println("Initializing - ready in 1,5 s");
+        log.debug("Waiting - initializing process in 1s");
         try {
-            Thread.sleep(2500);
-        } catch (InterruptedException e) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                // Interrupted - continue
+            }
+
+            sendMessageToProcess(new DocumentMessage(
+                    DocumentMessage.MessageType.PROCESS_INIT,
+                    getMyId(),
+                    new Document()
+            ));
+
+            log.debug("Sent init");
+        } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    protected void onInitializing() {
+        log.debug("Initializing - ready in 1,5 s");
+        try {
+            Thread.sleep(1500);
+        } catch (InterruptedException e) {
+            // Interrupted - continue
+        }
+
+        log.debug("Starting process");
 
         try {
             sendMessageToProcess(new DocumentMessage(
-                    DocumentMessage.MessageType.PROCESS_READY,
+                    DocumentMessage.MessageType.PROCESS_START,
                     getMyId(),
                     new Document()
             ));
@@ -40,9 +66,9 @@ public class ConsoleSensor extends InterfaceAgent {
     }
 
     @Override
-    protected void execute() {
-        System.out.println("executing");
-        for (int i=0; i<10; i++) {
+    protected void onExecuting() {
+        log.debug("Executing");
+        for (int i=0; i<2; i++) {
             try {
                 Document document = new Document();
                 document.put("name", "power" + (System.currentTimeMillis() % 100));
@@ -55,6 +81,7 @@ public class ConsoleSensor extends InterfaceAgent {
                                 getMyId(),
                                 document
                         ));
+                log.debug("Param " + i);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -68,7 +95,7 @@ public class ConsoleSensor extends InterfaceAgent {
 
         try {
             sendMessageToProcess(new DocumentMessage(
-                    DocumentMessage.MessageType.PROCESS_FINISHED,
+                    DocumentMessage.MessageType.PROCESS_STOP,
                     getMyId(),
                     new Document()
             ));
@@ -78,8 +105,8 @@ public class ConsoleSensor extends InterfaceAgent {
     }
 
     @Override
-    protected void finalizing() {
-        System.out.println("finalizing");
+    protected void onFinalizing() {
+        log.debug("Finalizing");
         try {
             sendMessageToProcess(new DocumentMessage(
                     DocumentMessage.MessageType.PROCESS_DATA_PARAM_OUT,
@@ -98,7 +125,7 @@ public class ConsoleSensor extends InterfaceAgent {
 
         try {
             sendMessageToProcess(new DocumentMessage(
-                    DocumentMessage.MessageType.PROCESS_FINALIZE,
+                    DocumentMessage.MessageType.PROCESS_FORCE_FINALIZE,
                     getMyId(),
                     new Document())
             );
@@ -108,7 +135,22 @@ public class ConsoleSensor extends InterfaceAgent {
     }
 
     @Override
-    protected void started() {
+    protected void onProcessAgentLinked() {
+        try {
+            log.debug("Process linked - sending init");
 
+            sendMessageToProcess(new DocumentMessage(
+                    DocumentMessage.MessageType.PROCESS_INIT,
+                    getMyId(),
+                    new Document()
+            ));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onProcessAgentUnlinked() {
+        log.debug("Production process unlinked");
     }
 }
