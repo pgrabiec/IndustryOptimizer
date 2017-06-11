@@ -7,6 +7,7 @@ import edu.agh.io.industryOptimizer.agents.ProductionProcessState;
 import edu.agh.io.industryOptimizer.messaging.Message;
 import edu.agh.io.industryOptimizer.messaging.messages.DocumentMessage;
 import edu.agh.io.industryOptimizer.messaging.messages.LinkConfigMessage;
+import edu.agh.io.industryOptimizer.messaging.util.CallbacksUtility;
 import edu.agh.io.industryOptimizer.messaging.util.StatefulCallbacksUtility;
 import org.bson.Document;
 
@@ -20,8 +21,12 @@ public abstract class InterfaceAgent extends AbstractStatefulAgent {
 
     private final List<LinkConfigMessage> linkConfigMessagesPending = new LinkedList<>();
 
+    protected InterfaceAgent(CallbacksUtility utility) {
+        super(utility);
+    }
+
     @Override
-    protected final void setupImpl(StatefulCallbacksUtility utility) {
+    protected final void setupCallbacksStateful(StatefulCallbacksUtility utility) {
         // WAITING
 
         utility.addCallback(
@@ -114,6 +119,8 @@ public abstract class InterfaceAgent extends AbstractStatefulAgent {
                     this.productionProcessId = null;
                     break;
             }
+
+            linkChanged();
         });
     }
 
@@ -126,9 +133,14 @@ public abstract class InterfaceAgent extends AbstractStatefulAgent {
         sendMessage(productionProcessId, message);
     }
 
+    protected boolean hasProcessId() {
+        return productionProcessId != null;
+    }
+
     protected abstract void preSetup();
     protected abstract void waiting();
     protected abstract void initialize();
     protected abstract void execute();
     protected abstract void finalizing();
+    protected abstract void linkChanged();
 }

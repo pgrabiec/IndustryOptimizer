@@ -1,6 +1,6 @@
 package edu.agh.io.industryOptimizer.agents.impl;
 
-import edu.agh.io.industryOptimizer.agents.AbstractAgent;
+import edu.agh.io.industryOptimizer.agents.AbstractStatelessAgent;
 import edu.agh.io.industryOptimizer.agents.AgentIdentifier;
 import edu.agh.io.industryOptimizer.agents.AgentType;
 import edu.agh.io.industryOptimizer.messaging.messages.DocumentMessage;
@@ -9,19 +9,51 @@ import edu.agh.io.industryOptimizer.messaging.util.CallbacksUtility;
 import org.bson.Document;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 
-/**
- * Created by Tomasz on 02.06.2017.
- */
-public class OptimalizationAgent extends AbstractAgent {
+public class OptimalizationAgent extends AbstractStatelessAgent {
 
     private AgentIdentifier persistenceAgent;
     private AgentIdentifier algorithmsAgent;
     private AgentIdentifier queryAgent;
 
-    @Override
-    protected void setupImpl(CallbacksUtility utility) {
+    private void applyLinkConfig(LinkConfigMessage config) {
+        config.getConfiguration().forEach(linkConfigEntry -> {
+            try {
+                Consumer<AgentIdentifier> callback = agentIdentifier -> {
+                    persistenceAgent = agentIdentifier;
+                };
+                if (linkConfigEntry.getAgentType()
+                        .equals(AgentType.PERSISTENCE)) {
+                    switch (linkConfigEntry.getOperationType()) {
+                        case LINK:
+                            persistenceAgent = linkConfigEntry.getAgentIdentifier();
+                            break;
+                        case UNLINK:
+                            persistenceAgent = null;
+                            break;
+                    }
+                }
 
+                if (linkConfigEntry.getAgentType()
+                        .equals(AgentType.ANALYSIS)) {
+                    switch (linkConfigEntry.getOperationType()) {
+                        case LINK:
+                            algorithmsAgent = linkConfigEntry.getAgentIdentifier();
+                            break;
+                        case UNLINK:
+                            algorithmsAgent = null;
+                            break;
+                    }
+                }
+            } catch (NullPointerException e) {
+//                System.out.println("Wrong agent type");
+            }
+        });
+    }
+
+    @Override
+    protected void setupCallbacksStateless(CallbacksUtility utility) {
         utility.addCallback(
                 LinkConfigMessage.class,
                 LinkConfigMessage.MessageType.LINK_CONFIG,
@@ -167,38 +199,5 @@ public class OptimalizationAgent extends AbstractAgent {
                     }
                 }
         );
-
-    }
-
-    private void applyLinkConfig(LinkConfigMessage config) {
-        config.getConfiguration().forEach(linkConfigEntry -> {
-            try {
-                if (linkConfigEntry.getAgentType()
-                        .equals(AgentType.PERSISTENCE)) {
-                    switch (linkConfigEntry.getOperationType()) {
-                        case LINK:
-                            persistenceAgent = linkConfigEntry.getAgentIdentifier();
-                            break;
-                        case UNLINK:
-                            persistenceAgent = null;
-                            break;
-                    }
-                }
-
-                if (linkConfigEntry.getAgentType()
-                        .equals(AgentType.ANALYSIS)) {
-                    switch (linkConfigEntry.getOperationType()) {
-                        case LINK:
-                            algorithmsAgent = linkConfigEntry.getAgentIdentifier();
-                            break;
-                        case UNLINK:
-                            algorithmsAgent = null;
-                            break;
-                    }
-                }
-            } catch (NullPointerException e) {
-                System.out.println("Wrong agent type");
-            }
-        });
     }
 }
